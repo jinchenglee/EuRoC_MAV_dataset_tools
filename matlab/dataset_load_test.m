@@ -7,11 +7,11 @@
 % Status   : under review
 % ------------------------------------------------------------------------------
 
-addpath('quaternion');
+addpath('/work/git_repo/dataset_tools/matlab/quaternion');
 
 % set dataset folder
 datasetPath = ...
-  '~/nas_mapbox/Datasets/Euroc-Datasets/ijrr_dataset_paper/vicon_room1/01_easy';
+  '/work/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy';
 
 disp(' ');
 disp([' > dataset_load_test [', datasetPath, ']']);

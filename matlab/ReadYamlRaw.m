@@ -34,7 +34,7 @@ function result = ReadYamlRaw(filename, verbose, nosuchfileaction, treatasdata)
         if not(ismember(dp, javaclasspath ('-dynamic')))
         	javaaddpath(dp); % javaaddpath clears global variables...!?
         end
-        import('org.yaml.snakeyaml.*');
+        %<<JC>> import('org.yaml.snakeyaml.*');
     end;
     
     setverblevel(verbose);
@@ -64,7 +64,7 @@ function result = load_yaml(inputfilename, nosuchfileaction, treatasdata)
         tadf = treatasdata;
     end;
    
-    yaml = org.yaml.snakeyaml.Yaml(); % It appears that Java objects cannot be persistent...!?
+    %<<JC>> yaml = org.yaml.snakeyaml.Yaml(); % It appears that Java objects cannot be persistent...!?
     if ~tadf
         [filepath, filename, fileext] = fileparts(inputfilename);
         if isempty(filepath)
@@ -75,9 +75,11 @@ function result = load_yaml(inputfilename, nosuchfileaction, treatasdata)
     end;
     try
         if ~tadf
-            result = scan(yaml.load(fileread([filename, fileext])));
+            %<<JC>> result = scan(yaml.load(fileread([filename, fileext])));
+            result = yaml_load(fileread([filename, fileext]));
         else
-            result = scan(yaml.load(inputfilename));
+            %<<JC>> result = scan(yaml.load(inputfilename));
+            result = scan(yaml_file_load(inputfilename));
         end;
     catch ex
         if ~tadf

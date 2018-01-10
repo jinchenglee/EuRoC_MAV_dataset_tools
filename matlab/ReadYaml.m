@@ -45,21 +45,21 @@ function result = ReadYaml(filename, nosuchfileaction, makeords, treatasdata, di
     end; 
 
     
-    ry = ReadYamlRaw(filename, 0, nosuchfileaction, treatasdata);
-    ry = deflateimports(ry);
-    if iscell(ry) && ...
-        length(ry) == 1 && ...
-        isstruct(ry{1}) && ...
-        length(fields(ry{1})) == 1 && ...
-        isfield(ry{1},'import')        
-        ry = ry{1};
-    end;
-    ry = mergeimports(ry);    
-    ry = doinheritance(ry);
-    ry = makematrices(ry, makeords);    
-    if exist('dictionary','var')
-        ry = dosubstitution(ry, dictionary);
-    end;
+    ry = ReadYamlRaw(filename, 1, nosuchfileaction, treatasdata);
+    %<<JC>> ry = deflateimports(ry);
+    %<<JC>> if iscell(ry) && ...
+    %<<JC>>     length(ry) == 1 && ...
+    %<<JC>>     isstruct(ry{1}) && ...
+    %<<JC>>     length(fields(ry{1})) == 1 && ...
+    %<<JC>>     isfield(ry{1},'import')        
+    %<<JC>>     ry = ry{1};
+    %<<JC>> end;
+    %<<JC>> ry = mergeimports(ry);    
+    %<<JC>> ry = doinheritance(ry);
+    %<<JC>> ry = makematrices(ry, makeords);    
+    %<<JC>> if exist('dictionary','var')
+    %<<JC>>     ry = dosubstitution(ry, dictionary);
+    %<<JC>> end;
     
     result = ry;
     clear global nsfe;
