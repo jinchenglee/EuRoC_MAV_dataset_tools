@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import scipy 
 import scipy.linalg 
-import pykitti
+#import pykitti
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
