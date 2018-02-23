@@ -137,18 +137,18 @@ def OF_TileFindFeature(cam0, tile_size, feature_params):
             
             new_corners = cv2.goodFeaturesToTrack(cam0_tile_size, **feature_params)
             if new_corners is not(None):
-                print("Tile (y,x):", i,j)
+                #print("Tile (y,x):", i,j)
                 # Reverse [i,j] in (x,y) coordinates recording !!!
                 new_corners = new_corners + [[j,i]]
                 #DEBUG print("new corners", new_corners.shape, new_corners)
-                print("New corners detected:", new_corners.shape[0])
+                #print("New corners detected:", new_corners.shape[0])
                 if i==0 and j==0:
                     corners = new_corners
                     #DEBUG print("i = ", i, " j = ", j, " corners", corners.shape, corners)
                 else:
                     corners = np.vstack((corners, new_corners))
                     #DEBUG print("i = ", i, " j = ", j, " corners", corners.shape, corners)
-                print("Total corners", corners.shape)
+                #print("Total corners", corners.shape)
             else:
                 print("Tile (y,x):", i,j)
                 print("No new corner detected.")
@@ -185,14 +185,14 @@ def OF_FeatureListFilter(p0, p1, p2, cam0_width, cam0_height):
     p2 = p2[tmp]
     feature_list=feature_list[tmp]
     print("Clean up step 1 (fwd bwd consistency): \tfeature_list.shape:", feature_list.shape)
-    # 2) Remove too small OF (static points) distance(p0,p1) < OF_MIN_OF_DISTANCE_THRESH pixels
-    distance = dist(p0.reshape(-1,2),p1.reshape(-1,2))
-    tmp = distance>OF_MIN_OF_DISTANCE_THRESH
-    p0 = p0[tmp]
-    p1 = p1[tmp]
-    p2 = p2[tmp]
-    feature_list=feature_list[tmp]
-    print("Clean up step 2 (mininum distance): \tfeature_list.shape:", feature_list.shape)
+#    # 2) Remove too small OF (static points) distance(p0,p1) < OF_MIN_OF_DISTANCE_THRESH pixels
+#    distance = dist(p0.reshape(-1,2),p1.reshape(-1,2))
+#    tmp = distance>OF_MIN_OF_DISTANCE_THRESH
+#    p0 = p0[tmp]
+#    p1 = p1[tmp]
+#    p2 = p2[tmp]
+#    feature_list=feature_list[tmp]
+#    print("Clean up step 2 (minimum distance): \tfeature_list.shape:", feature_list.shape)
     # 3) Remove points out of frame boundary 
     tmp = np.logical_or(p1[:,:,0]<0, p1[:,:,0]>cam0_width)
     tmp = np.logical_or(tmp, p1[:,:,1]<0)
