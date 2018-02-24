@@ -153,7 +153,7 @@ for fr in frame_range:
                             linestyle='-', color='plum', markersize=3)
 
         # Save points for next round
-        p0 = good_new.reshape(-1,1,2)
+        #p0 = good_new.reshape(-1,1,2)
 
     old_frame = frame.copy()
 
@@ -173,112 +173,112 @@ for idx in range(good_old.shape[0]):
 plt.show()
 
 
-#-------------------------------------------------------------------------------------
-# Start pose estimation process
-#-------------------------------------------------------------------------------------
-
-# Read in current and previous frames
-tmp_c = imread(frame_img_list[fr])
-frame_c = cv2.remap(tmp_c, camera.mapx, camera.mapy, cv2.INTER_LINEAR, cv2.BORDER_TRANSPARENT, 0)
-tmp_p = imread(frame_img_list[fr-STEP])
-frame_p = cv2.remap(tmp_p, camera.mapx, camera.mapy, cv2.INTER_LINEAR, cv2.BORDER_TRANSPARENT, 0)
-
-#-------------------
-# Use all points
-#-------------------
-print("\n--------------------------------")
-print("Initial pose estimation using all points:")
-print("--------------------------------")
-# Construct homogeneous coordinates points
-one_col = np.ones_like(good_new[:,0]).reshape(-1,1)
-pts_c = np.hstack((good_new[:,:2], one_col))
-pts_p = np.hstack((good_old[:,:2], one_col))
-
-# Calculate fundamental matrix F
-F = normalized_eight_point_alg(pts_c, pts_p)
-
-# Essential matrix
-E = camera.K.T.dot(F).dot(camera.K)
-
-# matched image points
-img_pts_all = np.zeros([2*pts_c.shape[0], pts_c.shape[1]-1])
-img_pts_all[::2,:] = pts_c[:,:-1]
-img_pts_all[1::2,:]= pts_p[:,:-1]
-img_pts_all = img_pts_all.reshape(-1,2,2)
-
-# Estimate RT matrix from E
-RT = estimate_RT_from_E(E, img_pts_all, camera.K)
-
-# Reproj erorr
-init_err, inliers_cnt = eval_RT_thresh(RT, img_pts_all, camera.K)
-print("Mean reproj error: ", init_err, "inliers/total:", inliers_cnt, "/", img_pts_all.shape[0], "\n")
-
-pFp = [pts_p[i].dot(F.dot(pts_c[i]))
-    for i in range(pts_c.shape[0])]
-print("p'^T F p =", np.abs(pFp).max())
-#print("Fundamental Matrix from normalized 8-point algorithm:\n", F)
-print("Estimated pose RT:\n", RT)
-
-
-
-#-------------------
-# Ransac 8 pts
-#-------------------
-print("\n--------------------------------")
-print("Started RANSAC 8pt algorithm:")
-print("--------------------------------")
-# Construct homogeneous coordinates points
-one_col = np.ones_like(good_new[:,0]).reshape(-1,1)
-pts_c = np.hstack((good_new[:,:2], one_col))
-pts_p = np.hstack((good_old[:,:2], one_col))
-
-RANSAC_TIMES = 500
-INLIER_RATIO_THRESH = 0.8
-
-min_err = init_err.copy()
-min_RT = np.empty((3,4))
-
-for i in range(RANSAC_TIMES):
-    ransac_8 = np.random.randint(0, pts_c.shape[0], size=8)
-    rand_pts_c = pts_c[ransac_8]
-    rand_pts_p = pts_p[ransac_8]
-
-    # Calculate fundamental matrix F
-    F = normalized_eight_point_alg(rand_pts_c, rand_pts_p)
-
-    # Essential matrix
-    E = camera.K.T.dot(F).dot(camera.K)
-
-    # matched image points
-    img_pts = np.zeros([2*rand_pts_c.shape[0], rand_pts_c.shape[1]-1])
-    img_pts[::2,:] = rand_pts_c[:,:-1]
-    img_pts[1::2,:]= rand_pts_p[:,:-1]
-    img_pts = img_pts.reshape(-1,2,2)
-
-    # Estimate RT matrix from E
-    RT = estimate_RT_from_E(E, img_pts, camera.K)
-
-    # Reproj erorr
-    err, inliers_cnt = eval_RT_thresh(RT, img_pts_all, camera.K)
-
-    #print("Mean reproj error: ", err, "Inlier=", inliers_cnt)
-    if err < min_err and (inliers_cnt/img_pts_all.shape[0])>INLIER_RATIO_THRESH:
-        print("Mean reproj error: ", err, "Inlier/total=", inliers_cnt, "/", img_pts_all.shape[0])
-
-        min_err = err.copy()
-        min_F = F
-        min_RT = RT
-
-
-print("\nAfter 8pt algorithm RANSAC pose estimation:")
-
-pFp = [pts_p[i].dot(min_F.dot(pts_c[i]))
-            for i in range(pts_c.shape[0])]
-print("p'^T F p =", np.abs(pFp).max())
-print("Fundamental Matrix from normalized 8-point algorithm:\n", min_F)
-print("Estimated pose RT:\n", min_RT)
-# Plotting the remapped points according to epipolar lines
-plot_points_on_images(pts_c, pts_p, frame_c, frame_p, min_F)
+##-------------------------------------------------------------------------------------
+## Start pose estimation process
+##-------------------------------------------------------------------------------------
+#
+## Read in current and previous frames
+#tmp_c = imread(frame_img_list[fr])
+#frame_c = cv2.remap(tmp_c, camera.mapx, camera.mapy, cv2.INTER_LINEAR, cv2.BORDER_TRANSPARENT, 0)
+#tmp_p = imread(frame_img_list[fr-STEP])
+#frame_p = cv2.remap(tmp_p, camera.mapx, camera.mapy, cv2.INTER_LINEAR, cv2.BORDER_TRANSPARENT, 0)
+#
+##-------------------
+## Use all points
+##-------------------
+#print("\n--------------------------------")
+#print("Initial pose estimation using all points:")
+#print("--------------------------------")
+## Construct homogeneous coordinates points
+#one_col = np.ones_like(good_new[:,0]).reshape(-1,1)
+#pts_c = np.hstack((good_new[:,:2], one_col))
+#pts_p = np.hstack((good_old[:,:2], one_col))
+#
+## Calculate fundamental matrix F
+#F = normalized_eight_point_alg(pts_c, pts_p)
+#
+## Essential matrix
+#E = camera.K.T.dot(F).dot(camera.K)
+#
+## matched image points
+#img_pts_all = np.zeros([2*pts_c.shape[0], pts_c.shape[1]-1])
+#img_pts_all[::2,:] = pts_c[:,:-1]
+#img_pts_all[1::2,:]= pts_p[:,:-1]
+#img_pts_all = img_pts_all.reshape(-1,2,2)
+#
+## Estimate RT matrix from E
+#RT = estimate_RT_from_E(E, img_pts_all, camera.K)
+#
+## Reproj erorr
+#init_err, inliers_cnt = eval_RT_thresh(RT, img_pts_all, camera.K)
+#print("Mean reproj error: ", init_err, "inliers/total:", inliers_cnt, "/", img_pts_all.shape[0], "\n")
+#
+#pFp = [pts_p[i].dot(F.dot(pts_c[i]))
+#    for i in range(pts_c.shape[0])]
+#print("p'^T F p =", np.abs(pFp).max())
+##print("Fundamental Matrix from normalized 8-point algorithm:\n", F)
+#print("Estimated pose RT:\n", RT)
+#
+#
+#
+##-------------------
+## Ransac 8 pts
+##-------------------
+#print("\n--------------------------------")
+#print("Started RANSAC 8pt algorithm:")
+#print("--------------------------------")
+## Construct homogeneous coordinates points
+#one_col = np.ones_like(good_new[:,0]).reshape(-1,1)
+#pts_c = np.hstack((good_new[:,:2], one_col))
+#pts_p = np.hstack((good_old[:,:2], one_col))
+#
+#RANSAC_TIMES = 500
+#INLIER_RATIO_THRESH = 0.8
+#
+#min_err = init_err.copy()
+#min_RT = np.empty((3,4))
+#
+#for i in range(RANSAC_TIMES):
+#    ransac_8 = np.random.randint(0, pts_c.shape[0], size=8)
+#    rand_pts_c = pts_c[ransac_8]
+#    rand_pts_p = pts_p[ransac_8]
+#
+#    # Calculate fundamental matrix F
+#    F = normalized_eight_point_alg(rand_pts_c, rand_pts_p)
+#
+#    # Essential matrix
+#    E = camera.K.T.dot(F).dot(camera.K)
+#
+#    # matched image points
+#    img_pts = np.zeros([2*rand_pts_c.shape[0], rand_pts_c.shape[1]-1])
+#    img_pts[::2,:] = rand_pts_c[:,:-1]
+#    img_pts[1::2,:]= rand_pts_p[:,:-1]
+#    img_pts = img_pts.reshape(-1,2,2)
+#
+#    # Estimate RT matrix from E
+#    RT = estimate_RT_from_E(E, img_pts, camera.K)
+#
+#    # Reproj erorr
+#    err, inliers_cnt = eval_RT_thresh(RT, img_pts_all, camera.K)
+#
+#    #print("Mean reproj error: ", err, "Inlier=", inliers_cnt)
+#    if err < min_err and (inliers_cnt/img_pts_all.shape[0])>INLIER_RATIO_THRESH:
+#        print("Mean reproj error: ", err, "Inlier/total=", inliers_cnt, "/", img_pts_all.shape[0])
+#
+#        min_err = err.copy()
+#        min_F = F
+#        min_RT = RT
+#
+#
+#print("\nAfter 8pt algorithm RANSAC pose estimation:")
+#
+#pFp = [pts_p[i].dot(min_F.dot(pts_c[i]))
+#            for i in range(pts_c.shape[0])]
+#print("p'^T F p =", np.abs(pFp).max())
+#print("Fundamental Matrix from normalized 8-point algorithm:\n", min_F)
+#print("Estimated pose RT:\n", min_RT)
+## Plotting the remapped points according to epipolar lines
+#plot_points_on_images(pts_c, pts_p, frame_c, frame_p, min_F)
 
 
 
