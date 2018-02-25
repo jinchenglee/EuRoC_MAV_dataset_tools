@@ -83,6 +83,38 @@ Two popular camera sensor set-ups exist today in VO research: monocular and ster
  
 Monocular camera system contains a single camera which captures images sequentially as robot body, where it attaches, moves. In comparison, stereo camera system setup rigidly holds two cameras which usually face same direction in parallel but at fixed distance $t$, called the baseline. 
 
+Although both setups follow same epipolar geometry described in \cite{Hartley2004} to recover relative pose, stereo cameras can restore absolute scale according to baseline distance while monocular system cannot recover from scale ambiguity. Nonetheless, due to limited baseline length in real-life applications, stereo camera setup degenerates to monocular case when object distance $D$ to baseline $t$ ratio 
+\begin{equation} \label{eq:1}
+ratio=D/t
+\end{equation}
+increases significantly. Thus this paper focuses on monocular discussion without losing generality. 
+
+
+
+
+%-------------------------------------------------------------------------
+\subsection{EuRoC MAV dataset}
+
+The EuRoC MAV dataset \cite{Burri25012016} is used to evaluate the VO algorithm described in this paper. The dataset is chosen because:
+
+\noindent 1) It is newly created in 2015 together with ground truth.
+
+\noindent 2) The camera sensors are global-shuttered thus potential issues with rolling-shuttered cameras are completed avoided. 
+
+\noindent 3) Time-synchronized data from other sensors allow future extension of the project.  
+
+Although EuRoC dataset contains stereo camera images, we will only use cam0 data as the monocular sensor captures in this paper.  
+
+
+\begin{figure}[h]
+\includegraphics[width=0.5\textwidth, inner]{latex/opticalflow_euroc_mav.png}
+\caption{OpenCV optical flow features tracking example on EuRoC MAV dataset.}
+\label{fig:figure2}
+\end{figure}
+
+%------------------------------------------------------------------------
+\section{Algorithms Overview}
+
 \begin{table}[t]
 \begin{center}
 \begin{tabular}{ |c|p{0.8\linewidth}| }
@@ -91,7 +123,7 @@ Monocular camera system contains a single camera which captures images sequentia
  \hline
  B. & Use optical flow tracking to establish 2D-2D feature points’ correspondences between consecutive frames. \\ 
  \hline
- C. & Estimate Fundamental or Essential Matrix using epipolar geometry constraints. Use RANSAC methods to rule out outliers in point-pairs.\\ 
+ C. & Estimate Fundamental or Essential Matrix using epipolar geometry constraints. Use RANSAC \cite{Fischler:1981:RSC:358669.358692} methods to rule out outliers in point-pairs.\\ 
  \hline
  D. & Recover camera pose (rotation R and translation T) from chosen Fundamental or Essential Matrix estimation, minimizing re-projection error to successfully initialize the VO. \\ 
  \hline
@@ -107,28 +139,6 @@ Monocular camera system contains a single camera which captures images sequentia
 \label{table:1}
 \end{table}
 
-Although both setups follow same epipolar geometry described in \cite{Hartley2004} to recover relative pose, stereo cameras can restore absolute scale according to baseline distance while monocular system cannot recover from scale ambiguity. Nonetheless, due to limited baseline length in real-life applications, stereo camera setup degenerates to monocular case when object distance $D$ to baseline $t$ ratio 
-\begin{equation} \label{eq:1}
-ratio=D/t
-\end{equation}
-increases significantly. Thus this paper focuses on monocular discussion without losing generality. 
-
-%-------------------------------------------------------------------------
-\subsection{EuRoC MAV dataset}
-
-The EuRoC MAV dataset \cite{Burri25012016} is used to evaluate the VO algorithm described in this paper. The dataset is chosen because:
-
-\noindent 1) It is newly created in 2015 together with ground truth.
-
-\noindent 2) The camera sensors are global-shuttered thus potential issues with rolling-shuttered cameras are completed avoided. 
-
-\noindent 3) Time-synchronized data from other sensors allow future extension of the project.  
-
-Although EuRoC dataset contains stereo camera images, we will only use cam0 data as the monocular sensor captures in this paper.  
-
-%------------------------------------------------------------------------
-\section{Algorithms Overview}
-
 The task of a VO system is to estimate relative poses between consecutive image frames temporally captured by the same camera sensor rigidly mounted on robot body. 
 
 Sequentially concatenating the estimated poses provides the current location and orientation of camera. Since relative pose is known from robot body to camera sensor, the robot location and orientation can be easily calculated from camera ones. Usually the camera center of first selected frame is chosen to be the world coordinate system origin. 
@@ -142,99 +152,92 @@ The key algorithms involved are detailed in next section.
 %------------------------------------------------------------------------
 \section{Detailed Technical Approach}
 
+
 %------------------------------------------------------------------------
-\subsection{Optical Flow based Feature Tracking}
+\subsection{Image Distortion Correction}
+
+Image frames captured by real-life cameras suffer from lens radial and tangential distortions. Images are undistorted using camera parameters acquired in calibration process, assuming below distortion model \cite{OpenCV_img_undistort}, $k_1, k_2, p_1, p_2$:
+\begin{align*} 
+x_{radial} &= x(1+k_1 r^2 + k_2 r^4) \\ 
+y_{radial} &= y(1+k_1 r^2 + k_2 r^4) \\ 
+x_{tangential} &= x + [2 p_1 x y + p_2 (r^2 + 2 x^2)] \\ 
+y_{tangential} &= y + [p_1 (r^2 + 2 y^2) + 2 p_2 x y]
+\label{eq:2}
+\end{align*} 
+
+
+
+%------------------------------------------------------------------------
+\subsection{Optical Flow based Feature Tracking}\label{optical_flow_subsection}
+
 
 Optical flow based on Lucas-Kanade algorithm \cite{Lucas-1981-15101} is a popular method to find and track features in consecutive image frames. It is relatively cheap in computation comparing to descriptor based methods, such as SIFT (Sorting Intolerant From Tolerant) \cite{Lowe04distinctiveimage}. 
 
 In this paper, OpenCV optical flow implementations \cite{OpenCV_optical_flow} are used for experiments. Figure \ref{fig:figure2} shows an example of OpenCV optical flow tracking feature points on EuRoC MAV dataset. Outliers are easily found there. 
 
- 
-\begin{figure}[h]
-\includegraphics[width=0.5\textwidth, inner]{latex/opticalflow_euroc_mav.png}
-\caption{OpenCV optical flow features tracking example on EuRoC MAV dataset.}
-\label{fig:figure2}
-\end{figure}
-
 %-------------------------------------------------------------------------
 \subsection{Monocular VO Initialization}
 
-
-
-%-------------------------------------------------------------------------
-\subsubsection{Fundamental $F$ or Essential Matrix $E$}
+Monocular VO initialization runs only once in a successful odometry recording process. It determines the origin and three axis of world coordinate system (usually set at camera center of very first image frame as illustrated in Figure \ref{fig:figure3}), as well as initial features (X, Y, Z) coordinates in this world system besides the scale in the world system for follow up operations. 
 
 %-------------------------------------------------------------------------
-\subsubsection{2D-2D point-pairs: Recover pose $R, T$ from $F$}
+\subsubsection{Fundamental $F$ or Essential Matrix $E$, 2D-2D correspondence}
+
+\begin{figure}[h]
+\includegraphics[width=0.5\textwidth]{latex/EpipolarConstraint.png}
+\caption{Epipolar constraint illustration.}
+\label{fig:figure3}
+\end{figure}
+
+Let $P$ be a feature point in world system, $p_1, p_2$ be the correspondences of $P$'s image captured on canonical plane of monocular camera sensor at different times. We have the epipolar constraint \cite{Hartley2004}:
+\begin{equation} \label{eq:2}
+p_2^T F p_1 = 0
+\end{equation}
+$F$ is the Fundamental Matrix. Since camera is calibrated thus intrinsics $K$ is known, \ref{eq:3} can be re-written using $E$, Essential Matrix:
+\begin{equation} \label{eq:3}
+p_2^T E p_1 = 0
+\end{equation}
+where $E=K^T F K$. 
 
 %-------------------------------------------------------------------------
-\subsubsection{Triangulation for feature 3D coordinates}
+\subsubsection{Extract $R, t$ from $E$ and Triangulation}
+
+Using the algorithm described in section 9.6 of \cite{Hartley2004}, we can extract relative rotation and translation $R, t$, between two camera positions from $E$. We have to triangulate a sample point into 3D space to find the true solution from four solutions provided. 
+
+%-------------------------------------------------------------------------
+\subsubsection{Initialization with RANSAC}
+
+Feature correspondences in 2D image, $p_1, p_2$, are provided by optical flow tracker described in \ref{optical_flow_subsection}. We need at least 8 point correspondences to calculate $F$ (normalized 8-pt algorithm \cite{Hartley2004}), or at least 5 point correspondences to calculate $E$ \cite{Nister:2004:ESF:987526.987623}. In this paper we use the linear 8-point algorithm for its simpler implemenation.
+
+We can calculate least squares solution of $F$ as we have more than 8 point feature  correspondences. However, due to existing outliers (easily seen in Figure \ref{fig:figure2}), we'll get erroneous result. Here, we use RANSAC \cite{Fischler:1981:RSC:358669.358692} algorithm to randomly select 8 point correspondences to calculate a candidate $F_i$. Then we calculate $E_i$ according to candidate $F_i$. Pose candidate $R_i, t_i$ follows. 
+
+Finally, using $K, R_i, t_i$, we re-project \emph{ALL} feature correspondence points one by one onto image plane and examine the re-projection error. If error is larger than certain threshold $Thresh$, the feature correspondence pair is deemed as outlier for current candidate $F_i, R_i, t_i$. 
+\begin{equation} \label{eq:3}
+{err}_{reproj} = d(x_i, \hat{x_i})
+\end{equation}
+\begin{equation} \label{eq:3}
+if ({err}_{reproj} < Thresh):
+    {inlier}_{cnt} += 1
+\end{equation}
+The candidate solution with most inliers stay as final solution. All inlier points are triangulated into world system to get (X,Y,Z) coordinates for future steps. They form the initialized point cloud of features. 
+
 
 %-------------------------------------------------------------------------
 \subsection{3D-2D point-pairs: PnP}
 
-MAIN TITLE. Center the title 1-3/8 inches (3.49 cm) from the top edge of
-the first page. The title should be in Times 14-point, boldface type.
-Capitalize the first letter of nouns, pronouns, verbs, adjectives, and
-adverbs; do not capitalize articles, coordinate conjunctions, or
-prepositions (unless the title begins with such a word). Leave two blank
-lines after the title.
-
-AUTHOR NAME(s) and AFFILIATION(s) are to be centered beneath the title
-and printed in Times 12-point, non-boldface type. This information is to
-be followed by two blank lines.
-
-The ABSTRACT and MAIN TEXT are to be in a two-column format.
-
-MAIN TEXT. Type main text in 10-point Times, single-spaced. Do NOT use
-double-spacing. All paragraphs should be indented 1 pica (approx. 1/6
-inch or 0.422 cm). Make sure your text is fully justified---that is,
-flush left and flush right. Please do not place any additional blank
-lines between paragraphs.
-
-Figure and table captions should be 9-point Roman type as in
-Figures~\ref{fig:onecol} and~\ref{fig:short}.  Short captions should be centred.
-
-\noindent Callouts should be 9-point Helvetica, non-boldface type.
-Initially capitalize only the first word of section titles and first-,
-second-, and third-order headings.
-
-FIRST-ORDER HEADINGS. (For example, {\large \bf 1. Introduction})
-should be Times 12-point boldface, initially capitalized, flush left,
-with one blank line before, and one blank line after.
-
-SECOND-ORDER HEADINGS. (For example, { \bf 1.1. Database elements})
-should be Times 11-point boldface, initially capitalized, flush left,
-with one blank line before, and one after. If you require a third-order
-heading (we discourage it), use 10-point Times, boldface, initially
-capitalized, flush left, preceded by one blank line, followed by a period
-and your text on the same line.
 
 %-------------------------------------------------------------------------
 \subsection{Bundle Adjustment}
 
-Please use footnotes\footnote {This is what a footnote looks like.  It
-often distracts the reader from the main flow of the argument.} sparingly.
-Indeed, try to avoid footnotes altogether and include necessary peripheral
-observations in
-the text (within parentheses, if you prefer, as in this sentence).  If you
-wish to use a footnote, place it at the bottom of the column on the page on
-which it is referenced. Use Times 8-point type, single-spaced.
 
 
 %------------------------------------------------------------------------
 \section{Preliminary Result Analysis}
 
-You must include your signed IEEE copyright release form when you submit
-your finished paper. We MUST have this form before your paper can be
-published in the proceedings.
 
 %------------------------------------------------------------------------
 \section{Conclusion and Future Work}
 
-You must include your signed IEEE copyright release form when you submit
-your finished paper. We MUST have this form before your paper can be
-published in the proceedings.
 
 {\small
 \bibliographystyle{ieee}
