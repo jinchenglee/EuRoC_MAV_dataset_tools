@@ -25,7 +25,7 @@
 \begin{document}
 
 %%%%%%%%% TITLE
-\title{Optical Flow based Monocular Odometry}
+\title{Optical Flow based Monocular Visual Odometry}
 
 \author{Jincheng Li\\
 {\tt\small jcli40@stanford.edu}
@@ -54,14 +54,17 @@
 Localization is a fundamental pre-requisite in robotic systems to enable autonomous 
 navigation. There exist various sensors to capture ego motion to help recover past trajectory thus identify robot location, from passive measurement sensors such as wheel-based odometry, GPS, IMU and camera, to active ones like radar, lidar. 
 
-Passive sensors are in general preferable as active sensors might suffer from interference in crowded circumstances. Among all the passive sensors, wheel-based odometry can only provide 1-dimension result while high-accuracy GPS/IMU systems come with expensive price tag. In contrast, camera, which is becoming more and more popular in recent years in robotics systems such as autonomous driving cars, is a very affordable passive sensor however providing rich information of surrounding environment. 
+Passive sensors are in general preferable as active sensors might suffer from interference in crowded circumstances. Among all the passive sensors, wheel-based odometry can only provide 1-dimension result while high-accuracy GPS/IMU systems come with expensive price tag. In contrast, camera, which is becoming more and more popular in recent years in robotics systems such as autonomous driving cars, is a very affordable passive sensor yet provides rich information of surrounding environment. 
 
 Taking advantage of the rich information from one or more cameras to estimate ego position and/or, to identify robot trajectory is an active research field called VO (Visual Odometry). VO is an essential part of another active research field called V-SLAM (Visual Simultaneously Localization and Mapping).
+
 
 %-------------------------------------------------------------------------
 \subsection{Visual Odometry}
 
 The term VO won popularity since 2004 in Nister's landmark article \cite{Nistr2004VisualO}. Just like the vehicle wheel odometry incrementally accumulates wheel rotations to estimate ego motion, VO examines images captured by on-board camera(s) to recover relative poses of robot body when the images are taken. Stitching recovered poses incrementally provides the trajectory, as well as location of the moving robot. 
+
+The problem of VO is similar in many ways to SfM (Structure from Motion) and SLAM problems. However, unlike SfM problem which usually deals with huge computation-intensive tasks offline, VO or SLAM system requires real-time responses to direct robot motion. VO can be deemed as a subset of SLAM system, i.e., the localization part. It doesn't need to maintain global structure/map consistency as required and fulfilled by loop closure in SLAM. VO only cares about local consistency.
 
 %-------------------------------------------------------------------------
 \subsection{Monocular and Stereo Camera System}
@@ -78,78 +81,97 @@ Two popular camera sensor set-ups exist today in VO research: monocular and ster
 \label{fig:VOSensorSetup}
 \end{figure}
  
-Monocular camera system contains a single camera which captures images sequentially as robot body, where it attaches to, moves. In comparison, stereo camera system setup rigidly holds two cameras which usually face same direction in parallel but at fixed distance $t$, called the baseline. 
+Monocular camera system contains a single camera which captures images sequentially as robot body, where it attaches, moves. In comparison, stereo camera system setup rigidly holds two cameras which usually face same direction in parallel but at fixed distance $t$, called the baseline. 
 
-Although both setups follow same epipolar geometry described in \cite{Hartley2004} to recover relative pose, stereo cameras can restore absolute scale according to baseline distance while monocular system cannot recover from scale ambiguity. However, due to limited baseline length in real-life applications, stereo camera setup degenerates to monocular case when object distance $D$ to baseline $t$ ratio 
+\begin{table}[t]
+\begin{center}
+\begin{tabular}{ |c|p{0.8\linewidth}| }
+ \hline
+ A. & Camera images undistortion assuming calibrated camera. \\ 
+ \hline
+ B. & Use optical flow tracking to establish 2D-2D feature points’ correspondences between consecutive frames. \\ 
+ \hline
+ C. & Estimate Fundamental or Essential Matrix using epipolar geometry constraints. Use RANSAC methods to rule out outliers in point-pairs.\\ 
+ \hline
+ D. & Recover camera pose (rotation R and translation T) from chosen Fundamental or Essential Matrix estimation, minimizing re-projection error to successfully initialize the VO. \\ 
+ \hline
+ E. & Triangulate 2D feature points to recover feature 3D coordinates in world coordinate system. \\ 
+ \hline
+ F. & Continue to use optical flow to track features and use triangulation to establish 3D-2D mapping problem to recover follow-up R and T poses using PnP algorithm. \\ 
+ \hline
+ G. & Camera trajectory can be obtained by stitching recovered camera poses, which is output of the VO program. Compare with ground truth and results analysis. \\
+ \hline
+\end{tabular}
+\end{center}
+\caption{Optical flow based Monocular VO steps.}
+\label{table:1}
+\end{table}
+
+Although both setups follow same epipolar geometry described in \cite{Hartley2004} to recover relative pose, stereo cameras can restore absolute scale according to baseline distance while monocular system cannot recover from scale ambiguity. Nonetheless, due to limited baseline length in real-life applications, stereo camera setup degenerates to monocular case when object distance $D$ to baseline $t$ ratio 
 \begin{equation} \label{eq:1}
 ratio=D/t
 \end{equation}
 increases significantly. Thus this paper focuses on monocular discussion without losing generality. 
 
-
 %-------------------------------------------------------------------------
 \subsection{EuRoC MAV dataset}
 
+The EuRoC MAV dataset \cite{Burri25012016} is used to evaluate the VO algorithm described in this paper. The dataset is chosen because:
+
+\noindent 1) It is newly created in 2015 together with ground truth.
+
+\noindent 2) The camera sensors are global-shuttered thus potential issues with rolling-shuttered cameras are completed avoided. 
+
+\noindent 3) Time-synchronized data from other sensors allow future extension of the project.  
+
+Although EuRoC dataset contains stereo camera images, we will only use cam0 data as the monocular sensor captures in this paper.  
 
 %------------------------------------------------------------------------
-\section{Problem Statement}
+\section{Algorithms Overview}
 
-The task of a monocular VO system is to estimate relative poses between consecutive image frames captured by the same camera mounted on robot body in sequence. 
+The task of a VO system is to estimate relative poses between consecutive image frames temporally captured by the same camera sensor rigidly mounted on robot body. 
 
-Sequentially concatenating the estimated poses provides the current location and orientation of camera. Since relative pose is known from robot body to camera sensor, the robot location and orientation can be easily calculated from camera ones. 
+Sequentially concatenating the estimated poses provides the current location and orientation of camera. Since relative pose is known from robot body to camera sensor, the robot location and orientation can be easily calculated from camera ones. Usually the camera center of first selected frame is chosen to be the world coordinate system origin. 
 
+The steps of optical-flow based monocular VO described in this paper are summarized in Table \ref{table:1} in simplest format. Due to time constraint, key elements usually exist in VO systems, such as keyframe maintenance, tracking lost recovery etc. are not included in this paper. 
+
+
+The key algorithms involved are detailed in next section. 
 
 
 %------------------------------------------------------------------------
-\section{Technical Approach}
+\section{Detailed Technical Approach}
 
-Detailed technical approach is discussed below. 
-
+%------------------------------------------------------------------------
 \subsection{Optical Flow based Feature Tracking}
 
 Optical flow based on Lucas-Kanade algorithm \cite{Lucas-1981-15101} is a popular method to find and track features in consecutive image frames. It is relatively cheap in computation comparing to descriptor based methods, such as SIFT (Sorting Intolerant From Tolerant) \cite{Lowe04distinctiveimage}. 
 
-In this paper, OpenCV optical flow implementations \cite{OpenCV_optical_flow} are used for experiments. 
+In this paper, OpenCV optical flow implementations \cite{OpenCV_optical_flow} are used for experiments. Figure \ref{fig:figure2} shows an example of OpenCV optical flow tracking feature points on EuRoC MAV dataset. Outliers are easily found there. 
 
-
+ 
+\begin{figure}[h]
+\includegraphics[width=0.5\textwidth, inner]{latex/opticalflow_euroc_mav.png}
+\caption{OpenCV optical flow features tracking example on EuRoC MAV dataset.}
+\label{fig:figure2}
+\end{figure}
 
 %-------------------------------------------------------------------------
 \subsection{Monocular VO Initialization}
 
-All printed material, including text, illustrations, and charts, must be kept
-within a print area 6-7/8 inches (17.5 cm) wide by 8-7/8 inches (22.54 cm)
-high.
-Page numbers should be in footer with page numbers, centered and .75
-inches from the bottom of the page and make it start at the correct page
-number rather than the 4321 in the example.  To do this fine the line (around
-line 23)
-\begin{verbatim}
-%\ifcvprfinal\pagestyle{empty}\fi
-\setcounter{page}{4321}
-\end{verbatim}
-where the number 4321 is your assigned starting page.
 
-Make sure the first page is numbered by commenting out the first page being
-empty on line 46
-\begin{verbatim}
-%\thispagestyle{empty}
-\end{verbatim}
 
 %-------------------------------------------------------------------------
 \subsubsection{Fundamental $F$ or Essential Matrix $E$}
 
 %-------------------------------------------------------------------------
-\subsubsection{2D-2D: Recover pose $R, T$ from $F$}
+\subsubsection{2D-2D point-pairs: Recover pose $R, T$ from $F$}
 
 %-------------------------------------------------------------------------
 \subsubsection{Triangulation for feature 3D coordinates}
 
 %-------------------------------------------------------------------------
-\subsection{3D-2D: PnP}
-
-Wherever Times is specified, Times Roman may also be used. If neither is
-available on your word processor, please use the font closest in
-appearance to Times to which you have access.
+\subsection{3D-2D point-pairs: PnP}
 
 MAIN TITLE. Center the title 1-3/8 inches (3.49 cm) from the top edge of
 the first page. The title should be in Times 14-point, boldface type.
