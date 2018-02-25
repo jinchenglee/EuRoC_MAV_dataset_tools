@@ -1,0 +1,223 @@
+\documentclass[10pt,twocolumn,letterpaper]{article}
+
+\usepackage{cvpr}
+\usepackage{times}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% Include other packages here, before hyperref.
+
+% If you comment hyperref and then uncomment it, you should delete
+% egpaper.aux before re-running latex.  (Or just hit 'q' on the first latex
+% run, let it finish, and you should be clear).
+\usepackage[breaklinks=true,bookmarks=false]{hyperref}
+
+\cvprfinalcopy % *** Uncomment this line for the final submission
+
+\def\cvprPaperID{****} % *** Enter the CVPR Paper ID here
+\def\httilde{\mbox{\tt\raisebox{-.5ex}{\symbol{126}}}}
+
+% Pages are numbered in submission mode, and unnumbered in camera-ready
+%\ifcvprfinal\pagestyle{empty}\fi
+\setcounter{page}{1}
+\begin{document}
+
+%%%%%%%%% TITLE
+\title{Optical Flow based Monocular Odometry}
+
+\author{Jincheng Li\\
+{\tt\small jcli40@stanford.edu}
+% For a paper whose authors are all at the same institution,
+% omit the following lines up until the closing ``}''.
+% Additional authors and addresses can be added with ``\and'',
+% just like the second author.
+% To save space, use either the email address or home page, not both
+}
+
+\maketitle
+%\thispagestyle{empty}
+
+%%%%%%%%% ABSTRACT
+\begin{abstract}
+   Visual odometry is an active research field in robotics. In this paper, 
+   the method of using only optical flow tracked features to recover a 
+   monocular camera pose is discussed. The discussed algorithms are 
+   experimented on EuRoC MAV dataset and results are analyzed. 
+\end{abstract}
+
+%%%%%%%%% BODY TEXT
+%-------------------------------------------------------------------------
+\section{Introduction}
+
+Localization is a fundamental pre-requisite in robotic systems to enable autonomous 
+navigation. There exist various sensors to capture ego motion to help recover past trajectory thus identify robot location, from passive measurement sensors such as wheel-based odometry, GPS, IMU and camera, to active ones like radar, lidar. 
+
+Passive sensors are in general preferable as active sensors might suffer from interference in crowded circumstances. Among all the passive sensors, wheel-based odometry can only provide 1-dimension result while high-accuracy GPS/IMU systems come with expensive price tag. In contrast, camera, which is becoming more and more popular in recent years in robotics systems such as autonomous driving cars, is a very affordable passive sensor however providing rich information of surrounding environment. 
+
+Taking advantage of the rich information from one or more cameras to estimate ego position and/or, to identify robot trajectory is an active research field called VO (Visual Odometry). VO is an essential part of another active research field called V-SLAM (Visual Simultaneously Localization and Mapping).
+
+%-------------------------------------------------------------------------
+\subsection{Visual Odometry}
+
+The term VO won popularity since 2004 in Nister's landmark article \cite{Nistr2004VisualO}. Just like the vehicle wheel odometry incrementally accumulates wheel rotations to estimate ego motion, VO examines images captured by on-board camera(s) to recover relative poses of robot body when the images are taken. Stitching recovered poses incrementally provides the trajectory, as well as location of the moving robot. 
+
+%-------------------------------------------------------------------------
+\subsection{Monocular and Stereo Camera System}
+
+Two popular camera sensor set-ups exist today in VO research: monocular and stereo camera systems, as shown in Fgiure \ref{fig:VOSensorSetup}.
+
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.9\linewidth, height=5cm]{latex/MonoCamSystem.png} 
+\includegraphics[width=0.7\linewidth, height=5cm]{latex/StereoCamSystem.png}
+
+\caption{VO camera sensor setups. (Upper) Monocular camera sensor captures images at different positions. (Lower) Stereo camera sensor captures two images simultaneously at fixed distance $t$, the baseline.}
+\label{fig:VOSensorSetup}
+\end{figure}
+ 
+Monocular camera system contains a single camera which captures images sequentially as robot body, where it attaches to, moves. In comparison, stereo camera system setup rigidly holds two cameras which usually face same direction in parallel but at fixed distance $t$, called the baseline. 
+
+Although both setups follow same epipolar geometry described in \cite{Hartley2004} to recover relative pose, stereo cameras can restore absolute scale according to baseline distance while monocular system cannot recover from scale ambiguity. However, due to limited baseline length in real-life applications, stereo camera setup degenerates to monocular case when object distance $D$ to baseline $t$ ratio 
+\begin{equation} \label{eq:1}
+ratio=D/t
+\end{equation}
+increases significantly. Thus this paper focuses on monocular discussion without losing generality. 
+
+
+%-------------------------------------------------------------------------
+\subsection{EuRoC MAV dataset}
+
+
+%------------------------------------------------------------------------
+\section{Problem Statement}
+
+The task of a monocular VO system is to estimate relative poses between consecutive image frames captured by the same camera mounted on robot body in sequence. 
+
+Sequentially concatenating the estimated poses provides the current location and orientation of camera. Since relative pose is known from robot body to camera sensor, the robot location and orientation can be easily calculated from camera ones. 
+
+
+
+%------------------------------------------------------------------------
+\section{Technical Approach}
+
+Detailed technical approach is discussed below. 
+
+\subsection{Optical Flow based Feature Tracking}
+
+Optical flow based on Lucas-Kanade algorithm \cite{Lucas-1981-15101} is a popular method to find and track features in consecutive image frames. It is relatively cheap in computation comparing to descriptor based methods, such as SIFT (Sorting Intolerant From Tolerant) \cite{Lowe04distinctiveimage}. 
+
+In this paper, OpenCV optical flow implementations \cite{OpenCV_optical_flow} are used for experiments. 
+
+
+
+%-------------------------------------------------------------------------
+\subsection{Monocular VO Initialization}
+
+All printed material, including text, illustrations, and charts, must be kept
+within a print area 6-7/8 inches (17.5 cm) wide by 8-7/8 inches (22.54 cm)
+high.
+Page numbers should be in footer with page numbers, centered and .75
+inches from the bottom of the page and make it start at the correct page
+number rather than the 4321 in the example.  To do this fine the line (around
+line 23)
+\begin{verbatim}
+%\ifcvprfinal\pagestyle{empty}\fi
+\setcounter{page}{4321}
+\end{verbatim}
+where the number 4321 is your assigned starting page.
+
+Make sure the first page is numbered by commenting out the first page being
+empty on line 46
+\begin{verbatim}
+%\thispagestyle{empty}
+\end{verbatim}
+
+%-------------------------------------------------------------------------
+\subsubsection{Fundamental $F$ or Essential Matrix $E$}
+
+%-------------------------------------------------------------------------
+\subsubsection{2D-2D: Recover pose $R, T$ from $F$}
+
+%-------------------------------------------------------------------------
+\subsubsection{Triangulation for feature 3D coordinates}
+
+%-------------------------------------------------------------------------
+\subsection{3D-2D: PnP}
+
+Wherever Times is specified, Times Roman may also be used. If neither is
+available on your word processor, please use the font closest in
+appearance to Times to which you have access.
+
+MAIN TITLE. Center the title 1-3/8 inches (3.49 cm) from the top edge of
+the first page. The title should be in Times 14-point, boldface type.
+Capitalize the first letter of nouns, pronouns, verbs, adjectives, and
+adverbs; do not capitalize articles, coordinate conjunctions, or
+prepositions (unless the title begins with such a word). Leave two blank
+lines after the title.
+
+AUTHOR NAME(s) and AFFILIATION(s) are to be centered beneath the title
+and printed in Times 12-point, non-boldface type. This information is to
+be followed by two blank lines.
+
+The ABSTRACT and MAIN TEXT are to be in a two-column format.
+
+MAIN TEXT. Type main text in 10-point Times, single-spaced. Do NOT use
+double-spacing. All paragraphs should be indented 1 pica (approx. 1/6
+inch or 0.422 cm). Make sure your text is fully justified---that is,
+flush left and flush right. Please do not place any additional blank
+lines between paragraphs.
+
+Figure and table captions should be 9-point Roman type as in
+Figures~\ref{fig:onecol} and~\ref{fig:short}.  Short captions should be centred.
+
+\noindent Callouts should be 9-point Helvetica, non-boldface type.
+Initially capitalize only the first word of section titles and first-,
+second-, and third-order headings.
+
+FIRST-ORDER HEADINGS. (For example, {\large \bf 1. Introduction})
+should be Times 12-point boldface, initially capitalized, flush left,
+with one blank line before, and one blank line after.
+
+SECOND-ORDER HEADINGS. (For example, { \bf 1.1. Database elements})
+should be Times 11-point boldface, initially capitalized, flush left,
+with one blank line before, and one after. If you require a third-order
+heading (we discourage it), use 10-point Times, boldface, initially
+capitalized, flush left, preceded by one blank line, followed by a period
+and your text on the same line.
+
+%-------------------------------------------------------------------------
+\subsection{Bundle Adjustment}
+
+Please use footnotes\footnote {This is what a footnote looks like.  It
+often distracts the reader from the main flow of the argument.} sparingly.
+Indeed, try to avoid footnotes altogether and include necessary peripheral
+observations in
+the text (within parentheses, if you prefer, as in this sentence).  If you
+wish to use a footnote, place it at the bottom of the column on the page on
+which it is referenced. Use Times 8-point type, single-spaced.
+
+
+%------------------------------------------------------------------------
+\section{Preliminary Result Analysis}
+
+You must include your signed IEEE copyright release form when you submit
+your finished paper. We MUST have this form before your paper can be
+published in the proceedings.
+
+%------------------------------------------------------------------------
+\section{Conclusion and Future Work}
+
+You must include your signed IEEE copyright release form when you submit
+your finished paper. We MUST have this form before your paper can be
+published in the proceedings.
+
+{\small
+\bibliographystyle{ieee}
+\bibliography{egbib}
+}
+
+\end{document}
+
