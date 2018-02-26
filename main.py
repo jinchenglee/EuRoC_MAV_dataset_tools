@@ -141,39 +141,41 @@ img_pts_all[::2,:] = pts_c[:,:-1]
 img_pts_all[1::2,:]= pts_p[:,:-1]
 img_pts_all = img_pts_all.reshape(-1,2,2)
 
-#-------------------
-# Use all points
-#-------------------
-print("\n--------------------------------")
-print("Initial pose estimation using all points:")
-print("--------------------------------")
-# Calculate fundamental matrix F
-F = normalized_eight_point_alg(pts_c, pts_p)
-
-# Essential matrix
-E = camera.K.T.dot(F).dot(camera.K)
+##-------------------
+## Use all points
+##-------------------
+#print("\n--------------------------------")
+#print("Initial pose estimation using all points:")
+#print("--------------------------------")
+## Calculate fundamental matrix F
+#F = normalized_eight_point_alg(pts_c, pts_p)
 #
-# Estimate RT matrix from E
-RT = estimate_RT_from_E(E, img_pts_all, camera.K)
-
-# Reproj erorr
-init_err, inliers_cnt, _ = eval_RT_thresh(RT, img_pts_all, camera.K)
-print("Mean reproj error: ", init_err, "inliers/total:", inliers_cnt, "/", img_pts_all.shape[0], "\n")
-
-pFp = [pts_p[i].dot(F.dot(pts_c[i]))
-    for i in range(pts_c.shape[0])]
-print("p'^T F p =", np.abs(pFp).max())
-#print("Fundamental Matrix from normalized 8-point algorithm:\n", F)
-print("Estimated pose RT:\n", RT)
-#plot_points_on_images(pts_c, pts_p, frame0, frame1, F)
-plt.imshow(frame1, cmap='gray')
-cur_color = (0.1, 0.7, 0.3, 1.0)
-for idx in range(pts_c.shape[0]):
-    plt.plot([pts_p[idx,0], pts_c[idx,0]], 
-                [pts_p[idx,1], pts_c[idx,1]], 
-                linestyle='-', color=cur_color, markersize=0.25)
-plt.savefig("8pt_alg_allpoints.png")
-plt.show()
+## Essential matrix
+#E = camera.K.T.dot(F).dot(camera.K)
+##
+## Estimate RT matrix from E
+#RT = estimate_RT_from_E(E, img_pts_all, camera.K)
+#
+## Reproj erorr
+#init_err, inliers_cnt, _ = eval_RT_thresh(RT, img_pts_all, camera.K)
+#print("Mean reproj error: ", init_err, "inliers/total:", inliers_cnt, "/", img_pts_all.shape[0], "\n")
+#
+#pFp = [pts_p[i].dot(F.dot(pts_c[i]))
+#    for i in range(pts_c.shape[0])]
+#print("p'^T F p =", np.abs(pFp).max())
+##print("Fundamental Matrix from normalized 8-point algorithm:\n", F)
+#print("Estimated pose RT:\n", RT)
+#
+# Visualization
+##plot_points_on_images(pts_c, pts_p, frame0, frame1, F)
+#plt.imshow(frame1, cmap='gray')
+#cur_color = (0.1, 0.7, 0.3, 1.0)
+#for idx in range(pts_c.shape[0]):
+#    plt.plot([pts_p[idx,0], pts_c[idx,0]], 
+#                [pts_p[idx,1], pts_c[idx,1]], 
+#                linestyle='-', color=cur_color, markersize=0.25)
+#plt.savefig("8pt_alg_allpoints.png")
+#plt.show()
 
 
 #-------------------
@@ -230,20 +232,29 @@ pFp = [pts_p[i].dot(min_F.dot(pts_c[i]))
 print("p'^T F p =", np.abs(pFp).max())
 print("Fundamental Matrix from normalized 8-point algorithm:\n", min_F)
 print("Estimated pose RT:\n", min_RT)
+
+# Visualization
 # Plotting the remapped points according to epipolar lines
 #plot_points_on_images(pts_c, pts_p, frame0, frame1, min_F)
 plt.imshow(frame1, cmap='gray')
 # Draw all inliers optical flow
-cur_color = (0.1, 0.7, 0.3, 1.0)
+inlier_color = (0.1, 0.7, 0.3, 1.0)
 for idx in min_inliers_list:
     plt.plot([pts_p[idx,0], pts_c[idx,0]], 
                 [pts_p[idx,1], pts_c[idx,1]], 
-                linestyle='-', color=cur_color, markersize=0.25)
+                linestyle='-', color=inlier_color, markersize=0.25)
+# Draw outliers optical flow
+outlier_color = (0.8, 0.1, 0.1, 0.7)
+for idx in range(pts_p.shape[0]):
+    if idx not in min_inliers_list:
+        plt.plot([pts_p[idx,0], pts_c[idx,0]], 
+                [pts_p[idx,1], pts_c[idx,1]], 
+                linestyle='-', color=outlier_color, markersize=0.25)
 # Draw all points
 plt.scatter(pts_p[:,0], pts_p[:,1], linestyle='-', c='g', s=2)
 plt.scatter(pts_c[:,0], pts_c[:,1], linestyle='-', c='r', s=2)
 plt.savefig("8pt_alg_ransac.png")
-plt.show()
+#plt.show()
 
 
 

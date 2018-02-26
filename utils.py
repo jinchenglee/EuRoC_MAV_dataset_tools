@@ -508,10 +508,10 @@ def eval_RT_thresh(RT, img_pts, K):
     M = np.array((M1, M2))
 
     error = 0.
-    inliers_cnt = 0
     SKIP_THRESH = 2  # distance of pixels threshold
 
     # inliers list
+    inliers_cnt = 0
     inliers_list = []
 
     for i in range(img_pts.shape[0]):
