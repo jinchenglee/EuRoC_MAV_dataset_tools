@@ -136,31 +136,31 @@ one_col = np.ones_like(good_new[:,0]).reshape(-1,1)
 pts_c = np.hstack((good_new[:,:2], one_col))
 pts_p = np.hstack((good_old[:,:2], one_col))
 
-#-------------------
-# Use all points
-#-------------------
-print("\n--------------------------------")
-print("Initial pose estimation using all points:")
-print("--------------------------------")
-
-err, F, RT = ALLPOINTS_estimate_RT(pts_c, pts_p, camera)
-
-pFp = [pts_p[i].dot(F.dot(pts_c[i]))
-    for i in range(pts_c.shape[0])]
-print("p'^T F p =", np.abs(pFp).max())
-#print("Fundamental Matrix from normalized 8-point algorithm:\n", F)
-print("Estimated pose RT:\n", RT)
-
-## Visualization
-##plot_points_on_images(pts_c, pts_p, frame0, frame1, F)
-#plt.imshow(frame1, cmap='gray')
-#cur_color = (0.1, 0.7, 0.3, 1.0)
-#for idx in range(pts_c.shape[0]):
-#    plt.plot([pts_p[idx,0], pts_c[idx,0]], 
-#                [pts_p[idx,1], pts_c[idx,1]], 
-#                linestyle='-', color=cur_color, markersize=0.25)
-#plt.savefig("8pt_alg_allpoints.png")
-##plt.show()
+##-------------------
+## Use all points
+##-------------------
+#print("\n--------------------------------")
+#print("Initial pose estimation using all points:")
+#print("--------------------------------")
+#
+#err, F, RT = ALLPOINTS_estimate_RT(pts_c, pts_p, camera)
+#
+#pFp = [pts_p[i].dot(F.dot(pts_c[i]))
+#    for i in range(pts_c.shape[0])]
+#print("p'^T F p =", np.abs(pFp).max())
+##print("Fundamental Matrix from normalized 8-point algorithm:\n", F)
+#print("Estimated pose RT:\n", RT)
+#
+### Visualization
+###plot_points_on_images(pts_c, pts_p, frame0, frame1, F)
+##plt.imshow(frame1, cmap='gray')
+##cur_color = (0.1, 0.7, 0.3, 1.0)
+##for idx in range(pts_c.shape[0]):
+##    plt.plot([pts_p[idx,0], pts_c[idx,0]], 
+##                [pts_p[idx,1], pts_c[idx,1]], 
+##                linestyle='-', color=cur_color, markersize=0.25)
+##plt.savefig("8pt_alg_allpoints.png")
+###plt.show()
 
 
 #-------------------
@@ -170,7 +170,7 @@ print("\n--------------------------------")
 print("Started RANSAC 8pt algorithm:")
 print("--------------------------------")
 
-RANSAC_TIMES = 100
+RANSAC_TIMES = 200
 INLIER_RATIO_THRESH = 0.8
 
 min_err, min_F, min_RT, min_inliers_list = RANSAC_estimate_RT(pts_c, pts_p, camera, 
@@ -231,5 +231,12 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-ax.scatter(inlier_pts_3D[:,0], inlier_pts_3D[:,1], inlier_pts_3D[:,2])
+reduced_pts = inlier_pts_3D[abs(inlier_pts_3D[:,2])<100]
+reduced_pts = reduced_pts[reduced_pts[:,2]>0]
+#ax.scatter(inlier_pts_3D[:,0], inlier_pts_3D[:,1], inlier_pts_3D[:,2])
+ax.scatter(reduced_pts[:,0], reduced_pts[:,1], reduced_pts[:,2])
+ax.set_xlabel('X axis')
+ax.set_ylabel('Y axis')
+ax.set_zlabel('Z axis')
+ax.view_init(azim=-89, elev=-50)
 plt.show()
