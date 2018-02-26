@@ -509,26 +509,34 @@ def eval_RT_thresh(RT, img_pts, K):
 
     error = 0.
     inliers_cnt = 0
-    SKIP_THRESH = 3  # distance of pixels threshold
+    SKIP_THRESH = 2  # distance of pixels threshold
+
+    # inliers list
+    inliers_list = []
 
     for i in range(img_pts.shape[0]):
         # Calculate the 3D point i
         X = linear_estimate_3d_point(img_pts[i], M)
-        # print("3d point in cam1: ", X)
+        #print("Point", i, ", 3d point in cam1: ", X)
 
         err = reprojection_error(X, img_pts[i], M)
-        err = np.mean(abs(err))
+        #print(err)
+        #err_dist = np.sqrt(err[0]**2 + err[1]**2) + np.sqrt(err[1]**2 + err[2]**2)
+        err_dist = np.mean(abs(err))
+        #print("Reprojection error = ", err_dist)
 
-        if err < SKIP_THRESH:
-            error += err
+        if err_dist < SKIP_THRESH:
+            #print("Inlier added:", i, err_dist)
+            error += err_dist
             inliers_cnt += 1
+            inliers_list.append(i)
 
     if inliers_cnt > 0:
         error /= inliers_cnt
     else:
         error = 1e+10
 
-    return error, inliers_cnt
+    return error, inliers_cnt, inliers_list
 
 
 
