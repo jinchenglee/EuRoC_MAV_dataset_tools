@@ -540,3 +540,122 @@ def eval_RT_thresh(RT, img_pts, K):
 
 
 
+def ALLPOINTS_estimate_RT(pts_c, pts_p, camera):
+    """
+    Using all point correspondences directly from optical flow in
+    current and previous frames to estimate best Fundamental Matrix F.
+    Essential Matrix E is recovered from F, and R, T estimated from E.
+
+    pts_c and pts_p are the feature correspondences in current and pre-
+    ious frames. 
+
+    Reprojection error is expected to be big. This function is used for
+    comparing with RANSAC_estimate_RT() function only.
+    """
+
+    # matched image points
+    img_pts_all = np.zeros([2*pts_c.shape[0], pts_c.shape[1]-1])
+    img_pts_all[::2,:] = pts_c[:,:-1]
+    img_pts_all[1::2,:]= pts_p[:,:-1]
+    img_pts_all = img_pts_all.reshape(-1,2,2)
+
+    min_err = 1e8
+    min_RT = np.empty((3,4))
+    min_inliers_list = []
+
+    # Calculate fundamental matrix F
+    F = normalized_eight_point_alg(pts_c, pts_p)
+
+    # Essential matrix
+    E = camera.K.T.dot(F).dot(camera.K)
+    #
+    # Estimate RT matrix from E
+    RT = estimate_RT_from_E(E, img_pts_all, camera.K)
+
+    # Reproj erorr
+    err, inliers_cnt, _ = eval_RT_thresh(RT, img_pts_all, camera.K)
+    print("Mean reproj error: ", err, "inliers/total:", inliers_cnt, "/", img_pts_all.shape[0], "\n")
+
+    return err, F, RT
+
+
+
+def RANSAC_estimate_RT(pts_c, pts_p, camera, 
+                    RANSAC_TIMES=100, INLIER_RATIO_THRESH=0.8):
+    """
+    Using RANSAC algorithm to randomly pick 8 point correspondences in
+    current and previous frames to estimate best Fundamental Matrix F.
+    Essential Matrix E is recovered from F, and R, T estimated from E.
+
+    pts_c and pts_p are the feature correspondences in current and pre-
+    ious frames. Reprojection error is used to evaluate the candidate
+    [F, E, R, T] solutions.
+    """
+
+    # matched image points
+    img_pts_all = np.zeros([2*pts_c.shape[0], pts_c.shape[1]-1])
+    img_pts_all[::2,:] = pts_c[:,:-1]
+    img_pts_all[1::2,:]= pts_p[:,:-1]
+    img_pts_all = img_pts_all.reshape(-1,2,2)
+
+    min_err = 1e8
+    min_RT = np.empty((3,4))
+    min_inliers_list = []
+
+    for i in range(RANSAC_TIMES):
+        ransac_8 = np.random.randint(0, pts_c.shape[0], size=8)
+        rand_pts_c = pts_c[ransac_8]
+        rand_pts_p = pts_p[ransac_8]
+
+        # Calculate fundamental matrix F
+        F = normalized_eight_point_alg(rand_pts_c, rand_pts_p)
+
+        # Essential matrix
+        E = camera.K.T.dot(F).dot(camera.K)
+
+        # matched image points
+        img_pts = np.zeros([2*rand_pts_c.shape[0], rand_pts_c.shape[1]-1])
+        img_pts[::2,:] = rand_pts_c[:,:-1]
+        img_pts[1::2,:]= rand_pts_p[:,:-1]
+        img_pts = img_pts.reshape(-1,2,2)
+
+        # Estimate RT matrix from E
+        RT = estimate_RT_from_E(E, img_pts, camera.K)
+
+        # Reproj erorr
+        err, inliers_cnt, inliers_list = eval_RT_thresh(RT, img_pts_all, camera.K)
+
+        if err < min_err and (inliers_cnt/img_pts_all.shape[0])>INLIER_RATIO_THRESH:
+            print("Mean reproj error: ", err, "Inlier/total=", inliers_cnt, "/", img_pts_all.shape[0])
+
+            min_err = err.copy()
+            min_F = F
+            min_RT = RT
+            min_inliers_list = inliers_list
+
+    return min_err, min_F, min_RT, min_inliers_list
+
+
+def triangulate(inlier_pts_c, inlier_pts_p, camera, min_RT):
+    """
+    Triangulate from image correspondences to get 3D coordindates. 
+    """
+    inlier_img_pts_all = np.zeros([2*inlier_pts_c.shape[0], inlier_pts_c.shape[1]-1])
+    inlier_img_pts_all[::2,:] = inlier_pts_c[:,:-1]
+    inlier_img_pts_all[1::2,:]= inlier_pts_p[:,:-1]
+    inlier_img_pts_all = inlier_img_pts_all.reshape(-1,2,2)
+
+    # Projective matrix M1
+    M1 = camera.K.dot(np.append(np.eye(3), np.zeros((3, 1)), axis=1))
+    # Projective matrix M2 candidate i
+    M2 = camera.K.dot(min_RT)
+    # Combine to matrix M
+    M = np.array((M1, M2))
+
+    # Output points array
+    inlier_pts_3D = np.empty((inlier_img_pts_all.shape[0], 3))
+    # Triangulate each point
+    for idx in range(inlier_img_pts_all.shape[0]):
+        inlier_pts_3D[idx] = nonlinear_estimate_3d_point(inlier_img_pts_all[idx], M).reshape(-1,3)
+
+    return inlier_pts_3D
