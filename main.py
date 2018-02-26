@@ -216,3 +216,20 @@ inlier_pts_p = pts_p[min_inliers_list]
 inlier_pts_c = pts_c[min_inliers_list]
 
 inlier_pts_3D = triangulate(inlier_pts_c, inlier_pts_p, camera, min_RT)
+
+#----------------------
+# Point cloud visualization
+#----------------------
+#import pandas as pd
+#from pyntcloud import PyntCloud
+#pd_dataframe = pd.DataFrame(inlier_pts_3D)
+#pd_dataframe.columns = ['x', 'y', 'z']
+#test = PyntCloud(pd_dataframe)
+#test.plot(lines=inlier_pts_3D.tolist(), line_color=0xFF00FF)
+
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(inlier_pts_3D[:,0], inlier_pts_3D[:,1], inlier_pts_3D[:,2])
+plt.show()
