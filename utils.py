@@ -407,11 +407,12 @@ def nonlinear_estimate_3d_point(image_points, camera_matrices):
     for i in range(num_iter):
         J = jacobian(pts_3d_nxt, cam)
         err = reprojection_error(pts_3d_nxt, pts_im, cam)
-        delta_pts_3d = -np.matmul(np.matmul(np.linalg.inv(J.T.dot(J)), J.T), err)
         # Debug
-        # print " nonlinear 3d_point = ", pts_3d_nxt
-        # print "error = ", err
-        # print "delta_3d_point = ", delta_pts_3d, "\n"
+        #print("Iter", i, " nonlinear 3d_point = ", pts_3d_nxt, "reproj_error = ", err)
+        if np.mean(abs(err))<0.3:
+            break
+        delta_pts_3d = -np.matmul(np.matmul(np.linalg.inv(J.T.dot(J)), J.T), err)
+        #print("delta_3d_point = ", delta_pts_3d, "\n")
         pts_3d_nxt += delta_pts_3d
 
     return pts_3d_nxt
@@ -452,7 +453,7 @@ def estimate_RT_from_E(E, img_pts, K):
 
             # Calculate the 3D point
             # <<FIXME>> Using non-linear method will meet 'singular matrix' error, how to fix it?
-            # X = nonlinear_estimate_3d_point(img_pts[i], M)
+            #X = nonlinear_estimate_3d_point(img_pts[i], M)
             X = linear_estimate_3d_point(img_pts[i], M)
             # print "3d point candidate ", j, " in cam1: ", X
             # Move X to camera2 coordinate system
@@ -508,7 +509,7 @@ def eval_RT_thresh(RT, img_pts, K):
     M = np.array((M1, M2))
 
     error = 0.
-    SKIP_THRESH = 2  # distance of pixels threshold
+    SKIP_THRESH = 2  # distance threshold - notice there is no absolute scale here!
 
     # inliers list
     inliers_cnt = 0
@@ -656,7 +657,7 @@ def triangulate(inlier_pts_c, inlier_pts_p, camera, min_RT):
     inlier_pts_3D = np.empty((inlier_img_pts_all.shape[0], 3))
     # Triangulate each point
     for idx in range(inlier_img_pts_all.shape[0]):
-        #inlier_pts_3D[idx] = nonlinear_estimate_3d_point(inlier_img_pts_all[idx], M).reshape(-1,3)
-        inlier_pts_3D[idx] = linear_estimate_3d_point(inlier_img_pts_all[idx], M).reshape(-1,3)
+        inlier_pts_3D[idx] = nonlinear_estimate_3d_point(inlier_img_pts_all[idx], M).reshape(-1,3)
+        #inlier_pts_3D[idx] = linear_estimate_3d_point(inlier_img_pts_all[idx], M).reshape(-1,3)
 
     return inlier_pts_3D
