@@ -254,7 +254,8 @@ def estimate_initial_RT(E):
     R2_sign = np.linalg.det(R2)
     R1 = -R1 if R1_sign < 0 else R1
     R2 = -R2 if R2_sign < 0 else R2
-    # T
+    # T - Here, we actually "normalized" T to be unit vector,
+    #   which determines the global scale in monocular VO/SLAM.
     T1 = U[:, 2]
     T2 = -U[:, 2]
     # RT
@@ -402,7 +403,8 @@ def nonlinear_estimate_3d_point(image_points, camera_matrices):
     # Number of iterations
     num_iter = 10
 
-    pts_3d_nxt = linear_estimate_3d_point(pts_im, cam)
+    pts_3d_linear = linear_estimate_3d_point(pts_im, cam)
+    pts_3d_nxt = pts_3d_linear.copy()
 
     for i in range(num_iter):
         J = jacobian(pts_3d_nxt, cam)
@@ -411,9 +413,19 @@ def nonlinear_estimate_3d_point(image_points, camera_matrices):
         #print("Iter", i, " nonlinear 3d_point = ", pts_3d_nxt, "reproj_error = ", err)
         if np.mean(abs(err))<0.3:
             break
-        delta_pts_3d = -np.matmul(np.matmul(np.linalg.inv(J.T.dot(J)), J.T), err)
-        #print("delta_3d_point = ", delta_pts_3d, "\n")
-        pts_3d_nxt += delta_pts_3d
+        JTdotJ = J.T.dot(J)
+        if np.linalg.det(JTdotJ) > 1e-5:
+            delta_pts_3d = -np.matmul(np.matmul(np.linalg.inv(JTdotJ), J.T), err)
+            pts_3d_nxt += delta_pts_3d
+            #print("delta_3d_point = ", delta_pts_3d, "\n")
+        else:
+            print("Singular JTdotJ met. Nonlinear optimization diverged(?).")
+            print("img points: ", pts_im, " Cam: ", cam)
+            print("Iter", i, " nonlinear 3d_point = ", pts_3d_nxt, " linear 3d_point = ", 
+                pts_3d_linear, " reproj_error = ", err)
+            # Return linear solution instead
+            return pts_3d_linear
+            break
 
     return pts_3d_nxt
 
@@ -452,20 +464,32 @@ def estimate_RT_from_E(E, img_pts, K):
             M = np.array((M1, M2))
 
             # Calculate the 3D point
-            # <<FIXME>> Using non-linear method will meet 'singular matrix' error, how to fix it?
+
+            # Using non-linear method will meet 'singular matrix' error, meaning the 
+            # nonlinear optimization has diverged. This most likely is because init_RT
+            # estimate provided is not good at all.
+            #
+            # We should NOT use nonlinear method here for 3d point estimate, as we are
+            # not after accuracy, but just ruling out apparent wrong solutions from the
+            # 4 provided ones. Linear method is GOOD ENOUGH for this purpose. 
+            #
             #X = nonlinear_estimate_3d_point(img_pts[i], M)
+
+            # Linear method instead
             X = linear_estimate_3d_point(img_pts[i], M)
+
             # print "3d point candidate ", j, " in cam1: ", X
             # Move X to camera2 coordinate system
             X2 = init_RT[j].dot(np.append(X, 1.).T)
             # print "3d point candidate ", j, " in cam2: ", X2.T
-            if X2[2] > 1.0 and X[2] > 1.0:
+            if X2[2] > 0.0 and X[2] > 0.0:
                 # print("img_pts[i]=", img_pts[i], ",X=", X, ",X2=", X2)
                 cnt[j] += 1
 
     index = np.argmax(cnt)
     # print("cnt = ", cnt, "index = ", index)
     RT = init_RT[index]
+
     return RT
 
 
@@ -657,7 +681,7 @@ def triangulate(inlier_pts_c, inlier_pts_p, camera, min_RT):
     inlier_pts_3D = np.empty((inlier_img_pts_all.shape[0], 3))
     # Triangulate each point
     for idx in range(inlier_img_pts_all.shape[0]):
-        #inlier_pts_3D[idx] = nonlinear_estimate_3d_point(inlier_img_pts_all[idx], M).reshape(-1,3)
-        inlier_pts_3D[idx] = linear_estimate_3d_point(inlier_img_pts_all[idx], M).reshape(-1,3)
+        inlier_pts_3D[idx] = nonlinear_estimate_3d_point(inlier_img_pts_all[idx], M).reshape(-1,3)
+        #inlier_pts_3D[idx] = linear_estimate_3d_point(inlier_img_pts_all[idx], M).reshape(-1,3)
 
     return inlier_pts_3D

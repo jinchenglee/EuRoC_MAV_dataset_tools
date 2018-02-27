@@ -94,10 +94,11 @@ camera = Camera(camera_sensor_config_yaml)
 frame0_ori = cv2.imread(frame_img_list[frame_range[0]], cv2.IMREAD_GRAYSCALE)
 # Image undistortion
 frame0 = cv2.remap(frame0_ori, camera.mapx, camera.mapy, cv2.INTER_LINEAR, cv2.BORDER_TRANSPARENT, 0)
+print("1st frame ", frame_range[0], ":", frame_img_list[frame_range[0]])
 
 # Read 2nd frame
 fr = frame_range[1]
-print("Frame ", fr, ":")
+print("2nd frame ", fr, ":", frame_img_list[fr])
 frame1_ori = cv2.imread(frame_img_list[fr], cv2.IMREAD_GRAYSCALE)
 # Image undistortion
 frame1 = cv2.remap(frame1_ori, camera.mapx, camera.mapy, cv2.INTER_LINEAR, cv2.BORDER_TRANSPARENT, 0)
