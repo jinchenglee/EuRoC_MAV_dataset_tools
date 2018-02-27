@@ -657,7 +657,7 @@ def triangulate(inlier_pts_c, inlier_pts_p, camera, min_RT):
     inlier_pts_3D = np.empty((inlier_img_pts_all.shape[0], 3))
     # Triangulate each point
     for idx in range(inlier_img_pts_all.shape[0]):
-        inlier_pts_3D[idx] = nonlinear_estimate_3d_point(inlier_img_pts_all[idx], M).reshape(-1,3)
-        #inlier_pts_3D[idx] = linear_estimate_3d_point(inlier_img_pts_all[idx], M).reshape(-1,3)
+        #inlier_pts_3D[idx] = nonlinear_estimate_3d_point(inlier_img_pts_all[idx], M).reshape(-1,3)
+        inlier_pts_3D[idx] = linear_estimate_3d_point(inlier_img_pts_all[idx], M).reshape(-1,3)
 
     return inlier_pts_3D

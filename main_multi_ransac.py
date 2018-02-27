@@ -45,8 +45,8 @@ tile_size = 200
 # List of camera data
 frame_img_list = np.sort(glob.glob(basedir+'mav0/cam0/data/*.png'))
 # No of frames to process - !!!process only two frames!!!, last digit is the gap
-START_FRAME = 0
-STEP = 3
+START_FRAME = 324
+STEP = 1
 frame_range = range(START_FRAME, START_FRAME+STEP+1, STEP)
 
 #--------------------------------
@@ -94,10 +94,11 @@ camera = Camera(camera_sensor_config_yaml)
 frame0_ori = cv2.imread(frame_img_list[frame_range[0]], cv2.IMREAD_GRAYSCALE)
 # Image undistortion
 frame0 = cv2.remap(frame0_ori, camera.mapx, camera.mapy, cv2.INTER_LINEAR, cv2.BORDER_TRANSPARENT, 0)
+print("1st frame ", frame_range[0], ":", frame_img_list[frame_range[0]])
 
 # Read 2nd frame
 fr = frame_range[1]
-print("Frame ", fr, ":")
+print("2nd frame ", fr, ":", frame_img_list[fr])
 frame1_ori = cv2.imread(frame_img_list[fr], cv2.IMREAD_GRAYSCALE)
 # Image undistortion
 frame1 = cv2.remap(frame1_ori, camera.mapx, camera.mapy, cv2.INTER_LINEAR, cv2.BORDER_TRANSPARENT, 0)
@@ -163,7 +164,7 @@ pts_p = np.hstack((good_old[:,:2], one_col))
 ###plt.show()
 
 # Run mutilple times of 8pt ransac algo.
-for ransac_times in range(5):
+for ransac_times in range(3):
     #-------------------
     # Ransac 8 pts
     #-------------------
@@ -172,7 +173,7 @@ for ransac_times in range(5):
     print("--------------------------------")
     
     RANSAC_TIMES = 200
-    INLIER_RATIO_THRESH = 0.8
+    INLIER_RATIO_THRESH = 0.6
     
     min_err, min_F, min_RT, min_inliers_list = RANSAC_estimate_RT(pts_c, pts_p, camera, 
                         RANSAC_TIMES, INLIER_RATIO_THRESH)
@@ -235,10 +236,11 @@ for ransac_times in range(5):
     reduced_pts = inlier_pts_3D[abs(inlier_pts_3D[:,2])<100]
     reduced_pts = reduced_pts[reduced_pts[:,2]>0]
     #ax.scatter(inlier_pts_3D[:,0], inlier_pts_3D[:,1], inlier_pts_3D[:,2])
-    ax.scatter(reduced_pts[:,0], reduced_pts[:,1], reduced_pts[:,2])
+    ax.scatter(reduced_pts[:,0], reduced_pts[:,1], reduced_pts[:,2], marker='x')
 
 ax.set_xlabel('X axis')
 ax.set_ylabel('Y axis')
 ax.set_zlabel('Z axis')
 ax.view_init(azim=-89, elev=-50)
+plt.savefig("pointcloud_multi_8pt_ransac.png")
 plt.show()
