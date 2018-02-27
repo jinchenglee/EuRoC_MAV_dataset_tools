@@ -45,8 +45,9 @@ tile_size = 200
 # List of camera data
 frame_img_list = np.sort(glob.glob(basedir+'mav0/cam0/data/*.png'))
 # No of frames to process - !!!process only two frames!!!, last digit is the gap
-START_FRAME = 324
-STEP = 1
+#START_FRAME = 324
+START_FRAME = 1321
+STEP = 2
 frame_range = range(START_FRAME, START_FRAME+STEP+1, STEP)
 
 #--------------------------------

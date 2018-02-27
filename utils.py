@@ -420,7 +420,7 @@ def nonlinear_estimate_3d_point(image_points, camera_matrices):
             #print("delta_3d_point = ", delta_pts_3d, "\n")
         else:
             print("Singular JTdotJ met. Nonlinear optimization diverged(?).")
-            print("img points: ", pts_im, " Cam: ", cam)
+            print("img points: ", pts_im, "\nCam: ", cam)
             print("Iter", i, " nonlinear 3d_point = ", pts_3d_nxt, " linear 3d_point = ", 
                 pts_3d_linear, " reproj_error = ", err)
             # Return linear solution instead

@@ -26,8 +26,8 @@ from points import *
 #--------------------------------
 # Change this to the directory where you store EuRoC MAV data
 #basedir = '/work/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/'
-basedir = '/Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/'
-#basedir = '/media/data/EuRoC_MAV_datset/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/'
+#basedir = '/Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/'
+basedir = '/media/data/EuRoC_MAV_datset/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/'
 
 #--------------------------------
 # Global variables:
@@ -41,11 +41,20 @@ pid = point_id() # point ID
 #-------------
 # Tile size
 tile_size = 200
+# Average Z threshold - If ave_Z is larger than normalized T=1 (translation between two frames used
+#   for R,T estimation, the estimation is deemed fail and we'll use next frame as 2nd frame.)
+AVE_Z_THRESH = 50
+# RANSAC parameters
+RANSAC_TIMES = 200
+RANSAC_INLIER_RATIO_THRESH = 0.6
+
 
 # List of camera data
 frame_img_list = np.sort(glob.glob(basedir+'mav0/cam0/data/*.png'))
 # No of frames to process - !!!process only two frames!!!, last digit is the gap
-START_FRAME = 0
+START_FRAME = 1321 # A good frame to try normal initialization.
+#START_FRAME = 465 # Static scene, expect large ave(Z)
+#START_FRAME = 324 # Almost all features on same plane, expect H matrix instead of F/E.
 STEP = 3
 frame_range = range(START_FRAME, START_FRAME+STEP+1, STEP)
 
@@ -171,11 +180,8 @@ print("\n--------------------------------")
 print("Started RANSAC 8pt algorithm:")
 print("--------------------------------")
 
-RANSAC_TIMES = 200
-INLIER_RATIO_THRESH = 0.8
-
 min_err, min_F, min_RT, min_inliers_list = RANSAC_estimate_RT(pts_c, pts_p, camera, 
-                    RANSAC_TIMES, INLIER_RATIO_THRESH)
+                    RANSAC_TIMES, RANSAC_INLIER_RATIO_THRESH)
 
 print("\nAfter 8pt algorithm RANSAC pose estimation:")
 
@@ -217,6 +223,11 @@ inlier_pts_p = pts_p[min_inliers_list]
 inlier_pts_c = pts_c[min_inliers_list]
 
 inlier_pts_3D = triangulate(inlier_pts_c, inlier_pts_p, camera, min_RT)
+# Sanity check on average depth
+ave_Z = np.median(abs(inlier_pts_3D[:,2]))
+if ave_Z > AVE_Z_THRESH:
+    print("Feature median depth(Z) from Triangulation too big, it is:", ave_Z, 
+            " threshold = ", AVE_Z_THRESH)
 
 #----------------------
 # Point cloud visualization
@@ -228,16 +239,15 @@ inlier_pts_3D = triangulate(inlier_pts_c, inlier_pts_p, camera, min_RT)
 #test = PyntCloud(pd_dataframe)
 #test.plot(lines=inlier_pts_3D.tolist(), line_color=0xFF00FF)
 
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
+#ax_all_pts = fig.add_subplot(122, projection='3d')
 reduced_pts = inlier_pts_3D[abs(inlier_pts_3D[:,2])<100]
 reduced_pts = reduced_pts[reduced_pts[:,2]>0]
-#ax.scatter(inlier_pts_3D[:,0], inlier_pts_3D[:,1], inlier_pts_3D[:,2])
+#ax_all_pts.scatter(inlier_pts_3D[:,0], inlier_pts_3D[:,1], inlier_pts_3D[:,2])
 ax.scatter(reduced_pts[:,0], reduced_pts[:,1], reduced_pts[:,2])
 ax.set_xlabel('X axis')
 ax.set_ylabel('Y axis')
 ax.set_zlabel('Z axis')
-ax.view_init(azim=-89, elev=-50)
+ax.view_init(azim=-85, elev=-50)
 plt.show()
