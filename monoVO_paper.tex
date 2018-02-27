@@ -25,7 +25,7 @@
 \begin{document}
 
 %%%%%%%%% TITLE
-\title{Optical Flow based Monocular Visual Odometry}
+\title{Optical Flow based Monocular Visual Odometry Initialization}
 
 \author{Jincheng Li\\
 {\tt\small jcli40@stanford.edu}
@@ -42,8 +42,7 @@
 %%%%%%%%% ABSTRACT
 \begin{abstract}
    Visual odometry is an active research field in robotics. In this paper, 
-   the method of using only optical flow tracked features to recover a 
-   monocular camera pose is discussed. The discussed algorithms are 
+   the method of using only optical flow tracked features to initialize monocular camera pose for visual odometry is discussed. The discussed algorithms are 
    experimented on EuRoC MAV dataset and results are analyzed. 
 \end{abstract}
 
@@ -143,7 +142,7 @@ The task of a VO system is to estimate relative poses between consecutive image 
 
 Sequentially concatenating the estimated poses provides the current location and orientation of camera. Since relative pose is known from robot body to camera sensor, the robot location and orientation can be easily calculated from camera ones. Usually the camera center of first selected frame is chosen to be the world coordinate system origin. 
 
-The steps of optical-flow based monocular VO described in this paper are summarized in Table \ref{table:1} in simplest format. Due to time constraint, key elements usually exist in VO systems, such as keyframe maintenance, tracking lost recovery etc. are not included in this paper. 
+The steps of optical-flow based monocular VO described in this paper are summarized in Table \ref{table:1} in simplest format. Due to time constraint, key elements usually exist in VO systems, such as keyframe maintenance, tracking lost recovery etc. are not included in this paper. This paper focuses on monocular initialization only (till step E in Table \ref{table:1}).
 
 
 The key algorithms involved are detailed in next section. 
@@ -199,6 +198,7 @@ p_2^T E p_1 = 0
 \end{equation}
 where $E=K^T F K$. 
 
+
 %-------------------------------------------------------------------------
 \subsubsection{Extract $R, t$ from $E$ and Triangulation}
 
@@ -225,15 +225,31 @@ The candidate solution with most inliers stay as final solution. All inlier poin
 %-------------------------------------------------------------------------
 \subsection{3D-2D point-pairs: PnP}
 
+(Might omit this part as focus is initialization.)
 
 %-------------------------------------------------------------------------
 \subsection{Bundle Adjustment}
 
-
+(To think/experiment: Try BA to fine-tune initial point cloud?)
 
 %------------------------------------------------------------------------
 \section{Preliminary Result Analysis}
 
+RANSAC-based 8 point algorithm proves it can successfully rule out outliers (marked RED) and keep only inliers (marked GREEN) as shown in Figure \ref{fig:figure4}. 
+
+\begin{figure}[h]
+\includegraphics[width=0.5\textwidth]{latex/8pt_ransac_inliers.png}
+\caption{RANSAC-based 8 point algorithm rules out outliers (RED) in optical flows. Inliers (GREEN) are kept.}
+\label{fig:figure4}
+\end{figure}
+
+Initialized point cloud calculated from above described algorithm is illustrated in Figure \ref{fig:figure5}. Please be noticed that monocular VO cannot recover absolute scale, so the axis scales are only showing relative locations of each point in the cloud up to a scale. 
+
+\begin{figure}[h]
+\includegraphics[width=0.5\textwidth]{latex/8pt_ransac_init_pcl.png}
+\caption{Initialized point cloud example. Groups match those circled out in Figure \ref{fig:figure4}}
+\label{fig:figure5}
+\end{figure}
 
 %------------------------------------------------------------------------
 \section{Conclusion and Future Work}
