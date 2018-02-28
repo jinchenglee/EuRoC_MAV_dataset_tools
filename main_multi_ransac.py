@@ -27,7 +27,8 @@ from points import *
 # Change this to the directory where you store EuRoC MAV data
 #basedir = '/work/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/'
 #basedir = '/Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/'
-basedir = '/media/data/EuRoC_MAV_datset/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/'
+basedir = '/Users/jinchengli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/'
+#basedir = '/media/data/EuRoC_MAV_datset/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/'
 
 #--------------------------------
 # Global variables:
@@ -47,7 +48,7 @@ frame_img_list = np.sort(glob.glob(basedir+'mav0/cam0/data/*.png'))
 # No of frames to process - !!!process only two frames!!!, last digit is the gap
 #START_FRAME = 324
 START_FRAME = 1321
-STEP = 2
+STEP = 3
 frame_range = range(START_FRAME, START_FRAME+STEP+1, STEP)
 
 #--------------------------------

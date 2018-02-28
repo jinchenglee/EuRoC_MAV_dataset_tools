@@ -624,8 +624,11 @@ def RANSAC_estimate_RT(pts_c, pts_p, camera,
     img_pts_all = img_pts_all.reshape(-1,2,2)
 
     min_err = 1e8
-    min_RT = np.empty((3,4))
     min_inliers_list = []
+    min_F = np.empty((3,3))
+    min_RT = np.empty((3,4))
+    # Use all points to estimate initial value
+    min_err, min_F, min_RT = ALLPOINTS_estimate_RT(pts_c, pts_p, camera)
 
     for i in range(RANSAC_TIMES):
         ransac_8 = np.random.randint(0, pts_c.shape[0], size=8)
