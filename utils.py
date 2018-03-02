@@ -580,8 +580,8 @@ def ALLPOINTS_estimate_RT(pts_c, pts_p, camera):
 
     # matched image points
     img_pts_all = np.zeros([2*pts_c.shape[0], pts_c.shape[1]-1])
-    img_pts_all[::2,:] = pts_c[:,:-1]
-    img_pts_all[1::2,:]= pts_p[:,:-1]
+    img_pts_all[::2,:] = pts_p[:,:-1]
+    img_pts_all[1::2,:]= pts_c[:,:-1]
     img_pts_all = img_pts_all.reshape(-1,2,2)
 
     min_err = 1e8
@@ -589,7 +589,7 @@ def ALLPOINTS_estimate_RT(pts_c, pts_p, camera):
     min_inliers_list = []
 
     # Calculate fundamental matrix F
-    F = normalized_eight_point_alg(pts_c, pts_p)
+    F = normalized_eight_point_alg(pts_p, pts_c)
 
     # Essential matrix
     E = camera.K.T.dot(F).dot(camera.K)
@@ -619,8 +619,8 @@ def RANSAC_estimate_RT(pts_c, pts_p, camera,
 
     # matched image points
     img_pts_all = np.zeros([2*pts_c.shape[0], pts_c.shape[1]-1])
-    img_pts_all[::2,:] = pts_c[:,:-1]
-    img_pts_all[1::2,:]= pts_p[:,:-1]
+    img_pts_all[::2,:] = pts_p[:,:-1]
+    img_pts_all[1::2,:]= pts_c[:,:-1]
     img_pts_all = img_pts_all.reshape(-1,2,2)
 
     min_err = 1e8
@@ -636,15 +636,15 @@ def RANSAC_estimate_RT(pts_c, pts_p, camera,
         rand_pts_p = pts_p[ransac_8]
 
         # Calculate fundamental matrix F
-        F = normalized_eight_point_alg(rand_pts_c, rand_pts_p)
+        F = normalized_eight_point_alg(rand_pts_p, rand_pts_c)
 
         # Essential matrix
         E = camera.K.T.dot(F).dot(camera.K)
 
         # matched image points
         img_pts = np.zeros([2*rand_pts_c.shape[0], rand_pts_c.shape[1]-1])
-        img_pts[::2,:] = rand_pts_c[:,:-1]
-        img_pts[1::2,:]= rand_pts_p[:,:-1]
+        img_pts[::2,:] = rand_pts_p[:,:-1]
+        img_pts[1::2,:]= rand_pts_c[:,:-1]
         img_pts = img_pts.reshape(-1,2,2)
 
         # Estimate RT matrix from E
@@ -669,8 +669,8 @@ def triangulate(inlier_pts_c, inlier_pts_p, camera, min_RT):
     Triangulate from image correspondences to get 3D coordindates. 
     """
     inlier_img_pts_all = np.zeros([2*inlier_pts_c.shape[0], inlier_pts_c.shape[1]-1])
-    inlier_img_pts_all[::2,:] = inlier_pts_c[:,:-1]
-    inlier_img_pts_all[1::2,:]= inlier_pts_p[:,:-1]
+    inlier_img_pts_all[::2,:] = inlier_pts_p[:,:-1]
+    inlier_img_pts_all[1::2,:]= inlier_pts_c[:,:-1]
     inlier_img_pts_all = inlier_img_pts_all.reshape(-1,2,2)
 
     # Projective matrix M1

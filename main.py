@@ -54,11 +54,11 @@ RANSAC_INLIER_RATIO_THRESH = 0.6
 # List of camera data
 frame_img_list = np.sort(glob.glob(basedir+'mav0/cam0/data/*.png'))
 # No of frames to process - !!!process only two frames!!!, last digit is the gap
-START_FRAME = 1321 # A good frame to try normal initialization.
+#START_FRAME = 1321 # A good frame to try normal initialization.
 #START_FRAME = 465 # Static scene, expect large ave(Z)
 #START_FRAME = 324 # Almost all features on same plane, expect H matrix instead of F/E.
-#START_FRAME = 0
-STEP = 3
+START_FRAME = 0
+STEP = 4
 frame_range = range(START_FRAME, START_FRAME+STEP+1, STEP)
 
 #--------------------------------
@@ -125,7 +125,7 @@ p1, st, err = cv2.calcOpticalFlowPyrLK(frame0, frame1, p0, None, **of.lk_params)
 good_old = p0[st==1]
 good_new = p1[st==1]
 
-# Visualization
+## Visualization
 #cur_rand_color = (np.random.rand(),0.7, np.random.rand(),1.0)
 ## Draw optic flow on last frame (frame1)
 #height, width = frame1.shape
@@ -261,3 +261,16 @@ ax.set_ylabel('Y axis')
 ax.set_zlabel('Z axis')
 ax.view_init(azim=-90, elev=-55)
 plt.show()
+
+
+#-------------------------
+# Bundle Adjustment on init point clound
+#-------------------------
+M1 = camera.K.dot(np.hstack((np.eye(3), np.zeros((3,1)))))
+M2 = camera.K.dot(min_RT)
+reproj_pts_p = np.matmul(M1, np.hstack((inlier_pts_3D, np.ones((inlier_pts_3D.shape[0],1)))).T).T
+reproj_pts_p = reproj_pts_p/reproj_pts_p[:,-1, np.newaxis]
+reproj_pts_c = np.matmul(M2, np.hstack((inlier_pts_3D, np.ones((inlier_pts_3D.shape[0],1)))).T).T
+reproj_pts_c = reproj_pts_c/reproj_pts_c[:,-1, np.newaxis]
+print("pts_p:", reproj_pts_p[:3], inlier_pts_p[:3])
+print("pts_c:", reproj_pts_c[:3], inlier_pts_c[:3])
