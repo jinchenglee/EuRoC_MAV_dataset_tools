@@ -345,7 +345,6 @@ def reprojection_error_L2_dist(point_3d, image_points, camera_matrices):
     err = err.reshape(M, )
     return err
 
-
 '''
 JACOBIAN given a 3D point and its corresponding points in the image
 planes, compute the reprojection error vector and associated Jacobian
@@ -712,3 +711,25 @@ def triangulate(inlier_pts_c, inlier_pts_p, camera, min_RT):
         #inlier_pts_3D[idx] = linear_estimate_3d_point(inlier_img_pts_all[idx], M).reshape(-1,3)
 
     return inlier_pts_3D
+
+
+def reprojection_error_per_cam(pts_3d, pts_2d, cam_perspective_matrix):
+    '''
+    This function is used to calculate reprojection error of all 3D points
+    observed in a single frame with same camera. Preparation for bundle
+    adjustment. 
+    Arguments:
+        pts_3d - the 3D points coordinates in world system, corresponding 
+                 to points in the image (Nx3)
+        pts_2d - the observed points in this frame (Nx2), image coordinates.
+        cam_perspective_matrix - K[R T] when this frame is taken, (3x4)
+    Returns:
+        reproj_err - ravel'ed L1 distance per point
+    '''
+    proj_img_pts = np.matmul(cam_perspective_matrix, 
+                        np.hstack([pts_3d, np.ones((pts_3d.shape[0],1))]).T)
+    proj_img_pts /= proj_img_pts[-1]
+    proj_img_pts = proj_img_pts.T
+    reproj_err = proj_img_pts[:,:2] - pts_2d
+    return reproj_err
+
