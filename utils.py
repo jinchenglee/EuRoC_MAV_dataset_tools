@@ -312,8 +312,6 @@ Arguments:
 Returns:
     error - the 2Mx1 reprojection error vector
 '''
-
-
 def reprojection_error(point_3d, image_points, camera_matrices):
     M = image_points.shape[0]
     # Reprojecting points to image
@@ -326,6 +324,26 @@ def reprojection_error(point_3d, image_points, camera_matrices):
     # Make it 2Mx1 vector
     reproj_error = reproj_error.reshape(2 * M, )
     return reproj_error
+
+
+def reprojection_error_L2_dist(point_3d, image_points, camera_matrices):
+    '''
+    Same as reprojection_error(), but return L2 norm distance as error.
+    Return:
+        err - the Mx1 reprojection L2 distance error. M - num of camera matrices.
+    '''
+    M = image_points.shape[0]
+    # Reprojecting points to image
+    proj_img_pts = np.matmul(camera_matrices, np.hstack([point_3d, 1.]))
+    # Normalize p' = [y1, y2]^T/y3
+    proj_img_pts = proj_img_pts.T
+    proj_img_pts /= proj_img_pts[-1, :]
+    # Re-projection error
+    reproj_error = proj_img_pts[:-1, :].T - image_points
+    # Make it 2Mx1 vector
+    err = np.sqrt(reproj_error[:,0]**2 + reproj_error[:,1]**2)
+    err = err.reshape(M, )
+    return err
 
 
 '''
@@ -409,9 +427,10 @@ def nonlinear_estimate_3d_point(image_points, camera_matrices):
     for i in range(num_iter):
         J = jacobian(pts_3d_nxt, cam)
         err = reprojection_error(pts_3d_nxt, pts_im, cam)
+        err_L2 = reprojection_error_L2_dist(pts_3d_nxt, pts_im, cam)
         # Debug
-        #print("Iter", i, " nonlinear 3d_point = ", pts_3d_nxt, "reproj_error = ", err)
-        if np.mean(abs(err))<0.3:
+        #print("Iter", i, " nonlinear 3d_point = ", pts_3d_nxt, "reproj_error = ", err_L2)
+        if np.mean(abs(err_L2))<0.3:
             break
         JTdotJ = J.T.dot(J)
         if np.linalg.det(JTdotJ) > 1e-5:
@@ -420,9 +439,9 @@ def nonlinear_estimate_3d_point(image_points, camera_matrices):
             #print("delta_3d_point = ", delta_pts_3d, "\n")
         else:
             print("Singular JTdotJ met. Nonlinear optimization diverged(?).")
-            print("img points: ", pts_im, "\nCam: ", cam)
-            print("Iter", i, " nonlinear 3d_point = ", pts_3d_nxt, " linear 3d_point = ", 
-                pts_3d_linear, " reproj_error = ", err)
+            print("img points: ", pts_im)
+            print("Iter", i, " nonlinear 3d_point=", pts_3d_nxt, ", linear 3d_point=", 
+                pts_3d_linear, ", reproj_error=", err_L2)
             # Return linear solution instead
             return pts_3d_linear
             break
@@ -511,7 +530,7 @@ def eval_RT(RT, img_pts, K):
         X = linear_estimate_3d_point(img_pts[i], M)
         # print("3d point in cam1: ", X)
 
-        err = reprojection_error(X, img_pts[i], M)
+        err = reprojection_error_L2_dist(X, img_pts[i], M)
         err = np.mean(abs(err))
 
         error += err
@@ -544,9 +563,8 @@ def eval_RT_thresh(RT, img_pts, K):
         X = linear_estimate_3d_point(img_pts[i], M)
         #print("Point", i, ", 3d point in cam1: ", X)
 
-        err = reprojection_error(X, img_pts[i], M)
+        err = reprojection_error_L2_dist(X, img_pts[i], M)
         #print(err)
-        #err_dist = np.sqrt(err[0]**2 + err[1]**2) + np.sqrt(err[1]**2 + err[2]**2)
         err_dist = np.mean(abs(err))
         #print("Reprojection error = ", err_dist)
 
@@ -599,7 +617,7 @@ def ALLPOINTS_estimate_RT(pts_c, pts_p, camera):
 
     # Reproj erorr
     err, inliers_cnt, _ = eval_RT_thresh(RT, img_pts_all, camera.K)
-    print("Mean reproj error: ", err, "inliers/total:", inliers_cnt, "/", img_pts_all.shape[0], "\n")
+    print("All points estimation. Mean reproj error: ", err, "inliers/total:", inliers_cnt, "/", img_pts_all.shape[0], "\n")
 
     return err, F, RT
 
@@ -680,10 +698,16 @@ def triangulate(inlier_pts_c, inlier_pts_p, camera, min_RT):
     # Combine to matrix M
     M = np.array((M1, M2))
 
+    # Print camera info flag
+    printed_cam_flag = False
+
     # Output points array
     inlier_pts_3D = np.empty((inlier_img_pts_all.shape[0], 3))
     # Triangulate each point
     for idx in range(inlier_img_pts_all.shape[0]):
+        if not printed_cam_flag:
+            print("\nCam: ", M)
+            printed_cam_flag = True
         inlier_pts_3D[idx] = nonlinear_estimate_3d_point(inlier_img_pts_all[idx], M).reshape(-1,3)
         #inlier_pts_3D[idx] = linear_estimate_3d_point(inlier_img_pts_all[idx], M).reshape(-1,3)
 

@@ -54,11 +54,11 @@ RANSAC_INLIER_RATIO_THRESH = 0.6
 # List of camera data
 frame_img_list = np.sort(glob.glob(basedir+'mav0/cam0/data/*.png'))
 # No of frames to process - !!!process only two frames!!!, last digit is the gap
-#START_FRAME = 1321 # A good frame to try normal initialization.
+START_FRAME = 1321 # A good frame to try normal initialization.
 #START_FRAME = 465 # Static scene, expect large ave(Z)
 #START_FRAME = 324 # Almost all features on same plane, expect H matrix instead of F/E.
-START_FRAME = 0
-STEP = 4
+#START_FRAME = 0
+STEP = 3
 frame_range = range(START_FRAME, START_FRAME+STEP+1, STEP)
 
 #--------------------------------
@@ -158,7 +158,7 @@ pts_p = np.hstack((good_old[:,:2], one_col))
 #
 #err, F, RT = ALLPOINTS_estimate_RT(pts_c, pts_p, camera)
 #
-#pFp = [pts_p[i].dot(F.dot(pts_c[i]))
+#pFp = [pts_c[i].dot(F.dot(pts_p[i]))
 #    for i in range(pts_c.shape[0])]
 #print("p'^T F p =", np.abs(pFp).max())
 ##print("Fundamental Matrix from normalized 8-point algorithm:\n", F)
@@ -192,7 +192,7 @@ if len(min_inliers_list) == 0:
 
 print("\nAfter 8pt algorithm RANSAC pose estimation:")
 
-pFp = [pts_p[i].dot(min_F.dot(pts_c[i]))
+pFp = [pts_c[i].dot(min_F.dot(pts_p[i]))
             for i in min_inliers_list]
 print("p'^T F p =", np.abs(pFp).max())
 print("Fundamental Matrix from normalized 8-point algorithm:\n", min_F)
@@ -272,5 +272,5 @@ reproj_pts_p = np.matmul(M1, np.hstack((inlier_pts_3D, np.ones((inlier_pts_3D.sh
 reproj_pts_p = reproj_pts_p/reproj_pts_p[:,-1, np.newaxis]
 reproj_pts_c = np.matmul(M2, np.hstack((inlier_pts_3D, np.ones((inlier_pts_3D.shape[0],1)))).T).T
 reproj_pts_c = reproj_pts_c/reproj_pts_c[:,-1, np.newaxis]
-print("pts_p:", reproj_pts_p[:3], inlier_pts_p[:3])
-print("pts_c:", reproj_pts_c[:3], inlier_pts_c[:3])
+print("pts_p:\n", reproj_pts_p[:3], "\n", inlier_pts_p[:3])
+print("pts_c:\n", reproj_pts_c[:3], "\n", inlier_pts_c[:3])

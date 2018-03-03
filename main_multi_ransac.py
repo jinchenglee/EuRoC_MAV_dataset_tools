@@ -46,8 +46,9 @@ tile_size = 200
 # List of camera data
 frame_img_list = np.sort(glob.glob(basedir+'mav0/cam0/data/*.png'))
 # No of frames to process - !!!process only two frames!!!, last digit is the gap
-#START_FRAME = 324
-START_FRAME = 1321
+START_FRAME = 0
+#START_FRAME = 324 # Features on same plane.
+#START_FRAME = 1321
 STEP = 3
 frame_range = range(START_FRAME, START_FRAME+STEP+1, STEP)
 
@@ -148,7 +149,7 @@ pts_p = np.hstack((good_old[:,:2], one_col))
 #
 #err, F, RT = ALLPOINTS_estimate_RT(pts_c, pts_p, camera)
 #
-#pFp = [pts_p[i].dot(F.dot(pts_c[i]))
+#pFp = [pts_c[i].dot(F.dot(pts_p[i]))
 #    for i in range(pts_c.shape[0])]
 #print("p'^T F p =", np.abs(pFp).max())
 ##print("Fundamental Matrix from normalized 8-point algorithm:\n", F)
@@ -182,7 +183,7 @@ for ransac_times in range(3):
     
     print("\nAfter 8pt algorithm RANSAC pose estimation:")
     
-    pFp = [pts_p[i].dot(min_F.dot(pts_c[i]))
+    pFp = [pts_c[i].dot(min_F.dot(pts_p[i]))
                 for i in min_inliers_list]
     print("p'^T F p =", np.abs(pFp).max())
     print("Fundamental Matrix from normalized 8-point algorithm:\n", min_F)
