@@ -58,7 +58,7 @@ START_FRAME = 1321 # A good frame to try normal initialization.
 #START_FRAME = 465 # Static scene, expect large ave(Z)
 #START_FRAME = 324 # Almost all features on same plane, expect H matrix instead of F/E.
 #START_FRAME = 0
-STEP = 3
+STEP = 4
 frame_range = range(START_FRAME, START_FRAME+STEP+1, STEP)
 
 #--------------------------------
@@ -266,8 +266,24 @@ plt.show()
 #-------------------------
 # Bundle Adjustment on init point clound
 #-------------------------
-M1 = camera.K.dot(np.hstack((np.eye(3), np.zeros((3,1)))))
+zero_RT = np.hstack((np.eye(3), np.zeros((3,1))))
+M1 = camera.K.dot(zero_RT)
 M2 = camera.K.dot(min_RT)
+
+camera_params = np.empty((2,6))
+# frame_p
+angle_p, direction_p = R2AxisAngle(zero_RT[:,:3])
+camera_params[0] = np.concatenate((angle_p*direction_p, zero_RT[:,-1]))
+# frame_c
+angle_c, direction_c = R2AxisAngle(min_RT[:,:3])
+camera_params[1] = np.concatenate((angle_c*direction_c, min_RT[:,-1]))
+
+# Inital value
+x0 = np.hstack((camera_params.ravel(), inlier_pts_3D.ravel()))
+
+res = scipy.optimize.least_squares(fun, x0, verbose=2, x_scale='jac', ftol=1e-4, method='trf', 
+            args=(camera.K, 2, inlier_pts_3D.shape[0], inlier_pts_p[:,:2], inlier_pts_c[:,:2]))
+
 reproj_pts_p = np.matmul(M1, np.hstack((inlier_pts_3D, np.ones((inlier_pts_3D.shape[0],1)))).T).T
 reproj_pts_p = reproj_pts_p/reproj_pts_p[:,-1, np.newaxis]
 reproj_pts_c = np.matmul(M2, np.hstack((inlier_pts_3D, np.ones((inlier_pts_3D.shape[0],1)))).T).T

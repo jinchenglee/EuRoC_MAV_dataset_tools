@@ -7,6 +7,7 @@ from scipy.misc import imread
 import glob
 import yaml
 import csv
+import math
 
 import matplotlib
 
@@ -713,6 +714,10 @@ def triangulate(inlier_pts_c, inlier_pts_p, camera, min_RT):
     return inlier_pts_3D
 
 
+#-----------------------
+# Below functions are related to Bundle Adjustment
+#-----------------------
+
 def reprojection_error_per_cam(pts_3d, pts_2d, cam_perspective_matrix):
     '''
     This function is used to calculate reprojection error of all 3D points
@@ -733,3 +738,87 @@ def reprojection_error_per_cam(pts_3d, pts_2d, cam_perspective_matrix):
     reproj_err = proj_img_pts[:,:2] - pts_2d
     return reproj_err
 
+def reprojection(pts_3d, pts_2d_p, pts_2d_c, M1, M2):
+    err = np.zeros((2, pts_3d.shape[0],2)) # Two cameras, each point has two errors err_x, err_y
+    err[0] = reprojection_error_per_cam(pts_3d, pts_2d_p, M1)
+    err[1] = reprojection_error_per_cam(pts_3d, pts_2d_c, M2)
+    return err.ravel()
+
+def R2AxisAngle(R):
+    """
+    This function referes to https://www.lfd.uci.edu/~gohlke/code/transformations.py.html.
+
+    Also, about corner cases, this website contains the details:
+    http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToAngle/
+
+    Return rotation angle and axis from rotation matrix.
+    """
+    R = np.array(R, dtype=np.float64, copy=False)
+    # direction: unit eigenvector of R corresponding to eigenvalue of 1
+    w, W = np.linalg.eig(R.T)
+    i = np.where(abs(np.real(w) - 1.0) < 1e-8)[0]
+    if not len(i):
+        raise ValueError('no unit eigenvector corresponding to eigenvalue 1')
+    direction = np.real(W[:, i[-1]]).squeeze()
+    # rotation angle depending on direction
+    cosa = (np.trace(R) - 1.0) / 2.0
+    if abs(direction[2]) > 1e-8:
+        sina = (R[1, 0] + (cosa-1.0)*direction[0]*direction[1]) / direction[2]
+    elif abs(direction[1]) > 1e-8:
+        sina = (R[0, 2] + (cosa-1.0)*direction[0]*direction[2]) / direction[1]
+    else:
+        sina = (R[2, 1] + (cosa-1.0)*direction[1]*direction[2]) / direction[0]
+    angle = math.atan2(sina, cosa)
+    return angle, direction 
+
+def AxisAngle2R(angle, direction):
+    """
+    Return matrix to rotate about axis defined by direction.
+
+    The inverse of R2AxisAngle().
+
+    """
+    sina = math.sin(angle)
+    cosa = math.cos(angle)
+    angle = np.linalg.norm(direction)
+    if angle > 1e-5: # When there's no rotation at all...
+        direction = direction/angle
+    # rotation matrix around unit vector
+    R = np.diag([cosa, cosa, cosa])
+    R += np.outer(direction, direction) * (1.0 - cosa)
+    direction *= sina
+    R += np.array([[ 0.0,         -direction[2],  direction[1]],
+                      [ direction[2], 0.0,          -direction[0]],
+                      [-direction[1], direction[0],  0.0]])
+    return R
+
+
+#def fun(params, camera_K, n_cameras, n_points, camera_idx, pt_idx, pts_2d):
+def fun(params, camera_K, n_cameras, n_points, pts_2d_p, pts_2d_c):
+    """
+    Compute residuals. 
+
+    'params' contains parameters to be optimized: camera parameters and 3D points coordinates.
+    camera_params:(n_cameras, 6), first 3 items rotation in AxisAngle, last 3 items translation. 
+    pts_3d: (n_points, 3)
+
+    camera_idx: (n_observations, )
+    pt_idx: (n_observations, )
+    pts_2d: (n_observations, 2)
+    """
+    # Variables in params are to be optimized
+    # camera_params uses AxisAngle.
+    camera_params = params[:n_cameras * 6].reshape((n_cameras, 6))
+    pts_3d = params[n_cameras * 6:].reshape((n_points, 3))
+
+    camera_RTs = np.empty((n_cameras, 3, 4))
+    for i in range(n_cameras):
+        angle = np.linalg.norm(camera_params[i,:3])
+        if angle < 1e-5: # When there's no rotation at all...
+            direction = camera_params[i,:3]
+        else:
+            direction = camera_params[i,:3]/angle
+        translation = camera_params[i,3:]
+        camera_RTs[i] = np.hstack((AxisAngle2R(angle, direction), translation.reshape(-1,1)))
+        camera_RTs[i] = camera_K.dot(camera_RTs[i])
+    return reprojection(pts_3d, pts_2d_p, pts_2d_c, camera_RTs[0], camera_RTs[1])
