@@ -297,9 +297,9 @@ def linear_estimate_3d_point(image_points, camera_matrices):
     A = np.vstack([A1, A2])
     U, s, V_trans = np.linalg.svd(A)
     point_3d = V_trans[3, :].copy()
-    # print "linear point_3d = ", point_3d
+    #print("linear point_3d = ", point_3d)
     point_3d /= point_3d[-1]
-    # print "linear point_3d (normed) = ", point_3d
+    #print("linear point_3d (normed) = ", point_3d)
     return point_3d[:-1]
 
 
@@ -512,33 +512,6 @@ def estimate_RT_from_E(E, img_pts, K):
     return RT
 
 
-def eval_RT(RT, img_pts, K):
-    # print("img_pts.shape=", img_pts.shape)
-
-    # Projective matrix M1
-    M1 = K.dot(np.append(np.eye(3), np.zeros((3, 1)), axis=1))
-
-    # Projective matrix M2
-    M2 = K.dot(RT)
-
-    M = np.array((M1, M2))
-
-    error = 0.
-
-    for i in range(img_pts.shape[0]):
-        # Calculate the 3D point i
-        X = linear_estimate_3d_point(img_pts[i], M)
-        # print("3d point in cam1: ", X)
-
-        err = reprojection_error_L2_dist(X, img_pts[i], M)
-        err = np.mean(abs(err))
-
-        error += err
-
-    error /= img_pts.shape[0]
-
-    return error
-
 
 def eval_RT_thresh(RT, img_pts, K):
     # print("img_pts.shape=", img_pts.shape)
@@ -568,7 +541,8 @@ def eval_RT_thresh(RT, img_pts, K):
         err_dist = np.mean(abs(err))
         #print("Reprojection error = ", err_dist)
 
-        if err_dist < SKIP_THRESH:
+        # Reprojection error is small AND point before camera
+        if err_dist < SKIP_THRESH and X[2]>0.:
             #print("Inlier added:", i, err_dist)
             error += err_dist
             inliers_cnt += 1
@@ -710,6 +684,8 @@ def triangulate(inlier_pts_c, inlier_pts_p, camera, min_RT):
             printed_cam_flag = True
         inlier_pts_3D[idx] = nonlinear_estimate_3d_point(inlier_img_pts_all[idx], M).reshape(-1,3)
         #inlier_pts_3D[idx] = linear_estimate_3d_point(inlier_img_pts_all[idx], M).reshape(-1,3)
+        if inlier_pts_3D[idx,-1]<0:
+            print("Triangulate(): Negative Z in point ", inlier_pts_3D[idx])
 
     return inlier_pts_3D
 
