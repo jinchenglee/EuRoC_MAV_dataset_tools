@@ -655,7 +655,21 @@ def RANSAC_estimate_RT(pts_c, pts_p, camera,
 
     return min_err, min_F, min_RT, min_inliers_list
 
-def RANSAC_PnP(pts_2d, pts_3d, 
+def linearPnP(pt_2d, pt_3d):
+    """
+    Every 2d pt (u,v,1) and 3d pt (X,Y,Z,1) provide two equations:
+    | 0 0 0 0 X Y Z 1 -vX -vY -vZ -v | 
+    |                                | T_12x1 = 0
+    | X Y Z 1 0 0 0 0 -uX -uY -uZ -u | 
+
+    Using 6 correspondences we can linearly solve T_3x4 matrix. 
+
+    Then we recover R,T by map T_3x4 onto SO3 for best estimate R using
+    SVD trick.
+    """
+    pass
+
+ def RANSAC_PnP(pts_2d, pts_3d, 
                 RANSAC_TIMES=100, INLIER_RATIO_THRESHOLD=0.8):
     """
     Using RANSAC algorithm to randomly pick 6 point correspondences in
