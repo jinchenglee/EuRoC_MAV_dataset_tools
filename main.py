@@ -45,7 +45,7 @@ pid = point_id() # point ID
 tile_size = 200
 # Average Z threshold - If ave_Z is larger than normalized T=1 (translation between two frames used
 #   for R,T estimation, the estimation is deemed fail and we'll use next frame as 2nd frame.)
-AVE_Z_THRESH = 100
+AVE_Z_THRESH = 70
 # RANSAC parameters
 RANSAC_TIMES = 200
 RANSAC_INLIER_RATIO_THRESH = 0.6
@@ -305,3 +305,53 @@ reproj_pts_c = np.matmul(M2, np.hstack((inlier_pts_3D, np.ones((inlier_pts_3D.sh
 reproj_pts_c = reproj_pts_c/reproj_pts_c[:,-1, np.newaxis]
 print("pts_p:\n", reproj_pts_p[:3], "\n", inlier_pts_p[:3])
 print("pts_c:\n", reproj_pts_c[:3], "\n", inlier_pts_c[:3])
+
+
+#-----------------------------
+# Start 3rd frame
+#-----------------------------
+# Read 2nd frame
+fr = START_FRAME+STEP+1 
+print("\n3rd frame ", fr, ":", frame_img_list[fr])
+frame2_ori = cv2.imread(frame_img_list[fr], cv2.IMREAD_GRAYSCALE)
+# Image undistortion
+frame2 = cv2.remap(frame2_ori, camera.mapx, camera.mapy, cv2.INTER_LINEAR, cv2.BORDER_TRANSPARENT, 0)
+
+# Use inlier points from 2D-2D pose estimate process above
+# Not sure why we must specify it as np.float32, otherwise opencv will assert. See here:
+# https://stackoverflow.com/questions/43063320/cv2-calcopticalflowpyrlk-adding-new-points
+p0 = inlier_pts_c[:,:-1].reshape(inlier_pts_c.shape[0],1,2).astype(np.float32)
+
+# Forward OF tracking
+p1, st, err = cv2.calcOpticalFlowPyrLK(frame1, frame2, p0, None, **of.lk_params)
+
+# Successfully tracked points
+good_old = p0[st==1]
+good_new = p1[st==1]
+tmp = inlier_pts_3D.reshape(inlier_pts_3D.shape[0],1,3)
+good_3d_pts = tmp[st==1]
+
+# Visualization
+cur_rand_color = (np.random.rand(),0.7, np.random.rand(),1.0)
+# Draw optic flow on last frame (frame1)
+height, width = frame2.shape
+plt.imshow(frame2, cmap='gray', extent=[0,width,height,0])
+plt.title("3rd frame")
+plt.scatter(good_old[:,0], good_old[:,1], linestyle='-', c='g', s=2)
+plt.scatter(good_new[:,0], good_new[:,1], linestyle='-', c='r', s=2)
+
+for idx in range(good_old.shape[0]):
+    plt.plot([good_old[idx,0], good_new[idx,0]],
+                    [good_old[idx,1], good_new[idx,1]],
+                    linestyle='-', color=cur_rand_color, markersize=0.25)
+plt.savefig("3rd_frame.png")
+plt.show()
+    
+# Construct homogeneous coordinates points
+one_col = np.ones_like(good_new[:,0]).reshape(-1,1)
+pts_2d = np.hstack((good_new[:,:2], one_col))
+pts_3d = good_3d_pts
+
+#-------------------------
+# 2D-3D PnP ransac solver
+#-------------------------

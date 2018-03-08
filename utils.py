@@ -655,6 +655,16 @@ def RANSAC_estimate_RT(pts_c, pts_p, camera,
 
     return min_err, min_F, min_RT, min_inliers_list
 
+def RANSAC_PnP(pts_2d, pts_3d, 
+                RANSAC_TIMES=100, INLIER_RATIO_THRESHOLD=0.8):
+    """
+    Using RANSAC algorithm to randomly pick 6 point correspondences in
+    pts_2d and pts_3d to estimate best R,T matrices using linearPnP 
+    method. 
+
+    Reprojection error is used to evaluate estimated R,T matrices.
+    """
+    pass
 
 def triangulate(inlier_pts_c, inlier_pts_p, camera, min_RT):
     """
