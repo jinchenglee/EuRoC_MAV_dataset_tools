@@ -512,8 +512,58 @@ def estimate_RT_from_E(E, img_pts, K):
     return RT
 
 
+def eval_RT_2D_3D(R, T, pts_2d, pts_3d, K, SKIP_THRESH=2.):
+    """
+    Evaluate matrices R, T from PnP estimation. 
 
-def eval_RT_thresh(RT, img_pts, K):
+    SKIP_THRESH: distance threshold - notice there is no absolute scale here!
+    """
+    RT = np.hstack((R,T.reshape((3,1))))
+
+    # Projective matrix M1
+    M1 = K.dot(np.append(np.eye(3), np.zeros((3, 1)), axis=1))
+
+    # Projective matrix M2
+    M2 = K.dot(RT)
+
+    M = np.array((M1, M2))
+
+    error = 0.
+
+    # inliers list
+    inliers_cnt = 0
+    inliers_list = []
+
+    for i in range(pts_2d.shape[0]):
+        # reprojection_error_L2_dist expects non-homo coordinates for pt_3d
+        pt_3d_nonhomo = pts_3d[i][:-1]
+
+        err = reprojection_error_L2_dist(pt_3d_nonhomo, pts_2d[i], M)
+        #print(err)
+        err_dist = np.mean(abs(err))
+        #print("Reprojection error = ", err_dist)
+
+        if err_dist < SKIP_THRESH:
+            #print("Inlier added:", i, err_dist)
+            error += err_dist
+            inliers_cnt += 1
+            inliers_list.append(i)
+
+    if inliers_cnt > 0:
+        error /= inliers_cnt
+    else:
+        error = 1e+10
+
+    return error, inliers_cnt, inliers_list
+
+
+def eval_RT_2D_2D(RT, img_pts, K, SKIP_THRESH=2):
+    """
+    Evaluate estimate RT matrix from Essential/Fundamental matrix, which is
+    estimated from 2D-2D image correspondences points.
+
+    SKIP_THRESH: distance threshold - notice there is no absolute scale here!
+    """
     # print("img_pts.shape=", img_pts.shape)
 
     # Projective matrix M1
@@ -525,7 +575,6 @@ def eval_RT_thresh(RT, img_pts, K):
     M = np.array((M1, M2))
 
     error = 0.
-    SKIP_THRESH = 2  # distance threshold - notice there is no absolute scale here!
 
     # inliers list
     inliers_cnt = 0
@@ -590,7 +639,7 @@ def ALLPOINTS_estimate_RT(pts_c, pts_p, camera):
     RT = estimate_RT_from_E(E, img_pts_all, camera.K)
 
     # Reproj erorr
-    err, inliers_cnt, _ = eval_RT_thresh(RT, img_pts_all, camera.K)
+    err, inliers_cnt, _ = eval_RT_2D_2D(RT, img_pts_all, camera.K)
     print("All points estimation. Mean reproj error: ", err, "inliers/total:", inliers_cnt, "/", img_pts_all.shape[0], "\n")
 
     return err, F, RT
@@ -643,7 +692,7 @@ def RANSAC_estimate_RT(pts_c, pts_p, camera,
         RT = estimate_RT_from_E(E, img_pts, camera.K)
 
         # Reproj erorr
-        err, inliers_cnt, inliers_list = eval_RT_thresh(RT, img_pts_all, camera.K)
+        err, inliers_cnt, inliers_list = eval_RT_2D_2D(RT, img_pts_all, camera.K)
 
         if err < min_err and (inliers_cnt/img_pts_all.shape[0])>INLIER_RATIO_THRESH:
             print("Mean reproj error: ", err, "Inlier/total=", inliers_cnt, "/", img_pts_all.shape[0])
@@ -655,7 +704,7 @@ def RANSAC_estimate_RT(pts_c, pts_p, camera,
 
     return min_err, min_F, min_RT, min_inliers_list
 
-def linearPnP(pt_2d, pt_3d):
+def linearPnP(pts_2d, pts_3d):
     """
     Every 2d pt (u,v,1) and 3d pt (X,Y,Z,1) provide two equations:
     | 0 0 0 0 X Y Z 1 -vX -vY -vZ -v | 
@@ -666,11 +715,52 @@ def linearPnP(pt_2d, pt_3d):
 
     Then we recover R,T by map T_3x4 onto SO3 for best estimate R using
     SVD trick.
-    """
-    pass
 
- def RANSAC_PnP(pts_2d, pts_3d, 
-                RANSAC_TIMES=100, INLIER_RATIO_THRESHOLD=0.8):
+    Input pts_2d and pts_3d are expected in homogeneous coordinates.
+    """
+    u = pts_2d[:,0]
+    v = pts_2d[:,1]
+    X = pts_3d[:,0]
+    Y = pts_3d[:,1]
+    Z = pts_3d[:,2]
+
+    vX = np.multiply(v, X)
+    vY = np.multiply(v, Y)
+    vZ = np.multiply(v, Z)
+
+    uX = np.multiply(u, X)
+    uY = np.multiply(u, Y)
+    uZ = np.multiply(u, Z)
+
+    col_zeros = np.zeros_like(u)
+    col_ones = np.ones_like(u)
+
+    # Construct matrix A for A T = 0
+    A_upper = np.vstack((col_zeros, col_zeros, col_zeros, col_zeros, X, Y, Z, col_ones, 
+            -vX, -vY, -vZ, -v)).T
+    A_lower = np.vstack((X, Y, Z, col_ones, col_zeros, col_zeros, col_zeros, col_zeros, 
+            -uX, -uY, -uZ, -u)).T
+    A = np.vstack((A_upper, A_lower))
+
+    # Solve A T = 0 using SVD
+    U, s, V_transpose = np.linalg.svd(A)
+    tmp = V_transpose[-1,:].reshape(3,4)
+    R_tmp = tmp[:,:-1]
+    T_tmp = tmp[:,-1]
+
+    # Using SVD again to map R_tmp onto SO(3)
+    U1, s1, V_transpose1 = np.linalg.svd(R_tmp, full_matrices=True)
+    U1V1 = np.matmul(U1, V_transpose1)
+    if np.linalg.det(U1V1) > 0:
+        R = U1V1
+        T = T_tmp/s1[0]
+    else:
+        R = -U1V1
+        T = -T_tmp/s1[0]
+
+    return R, T
+
+def RANSAC_PnP(pts_2d, pts_3d, camera, RANSAC_TIMES=100, INLIER_RATIO_THRESHOLD=0.8):
     """
     Using RANSAC algorithm to randomly pick 6 point correspondences in
     pts_2d and pts_3d to estimate best R,T matrices using linearPnP 
@@ -678,7 +768,35 @@ def linearPnP(pt_2d, pt_3d):
 
     Reprojection error is used to evaluate estimated R,T matrices.
     """
-    pass
+
+    min_err = 1e8
+    min_inliers_list = []
+    min_R = np.empty((3,3))
+    min_T = np.empty((3,))
+    # Use all points to estimate initial value
+    min_R, min_T = linearPnP(pts_2d, pts_3d)
+
+    for i in range(RANSAC_TIMES):
+        ransac_6 = np.random.randint(0, pts_2d.shape[0], size=6)
+        rand_pts_2d = pts_2d[ransac_6]
+        rand_pts_3d = pts_3d[ransac_6]
+
+        # Estimate RT matrix from E
+        R, T = linearPnP(pts_2d, pts_3d)
+
+        # Reproj erorr
+        err, inliers_cnt, inliers_list = eval_RT_2D_3D(R, T, pts_2d, pts_3d, camera.K)
+
+        if err < min_err and (inliers_cnt/pts_2d.shape[0])>INLIER_RATIO_THRESH:
+            print("Mean reproj error: ", err, "Inlier/total=", inliers_cnt, "/", img_pts_all.shape[0])
+
+            min_err = err.copy()
+            min_R = R
+            min_T = T
+            min_inliers_list = inliers_list
+
+    return min_err, min_R, min_T, min_inliers_list
+
 
 def triangulate(inlier_pts_c, inlier_pts_p, camera, min_RT):
     """

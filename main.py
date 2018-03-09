@@ -350,8 +350,11 @@ plt.show()
 # Construct homogeneous coordinates points
 one_col = np.ones_like(good_new[:,0]).reshape(-1,1)
 pts_2d = np.hstack((good_new[:,:2], one_col))
-pts_3d = good_3d_pts
+one_col = np.ones_like(good_3d_pts[:,0]).reshape(-1,1)
+pts_3d = np.hstack((good_3d_pts, one_col))
 
 #-------------------------
 # 2D-3D PnP ransac solver
 #-------------------------
+ R, T = linearPnP(pts_2d, pts_3d)
+
