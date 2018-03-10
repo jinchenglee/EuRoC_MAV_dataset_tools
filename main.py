@@ -27,8 +27,8 @@ from points import *
 #--------------------------------
 # Change this to the directory where you store EuRoC MAV data
 #basedir = '/work/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/'
-#basedir = '/Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/'
-basedir = '/Users/jinchengli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/'
+basedir = '/Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/'
+#basedir = '/Users/jinchengli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/'
 #basedir = '/media/data/EuRoC_MAV_datset/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/'
 
 #--------------------------------
@@ -66,7 +66,7 @@ START_FRAME = 1321 # A good frame to try normal initialization.
 for STEP in range(1,5,1):
 
     print("\n-------------------")
-    print("VO init with STEP = ", STEP)
+    print("VO init (2D-2D) with STEP = ", STEP)
     print("-------------------")
 
     frame_range = range(START_FRAME, START_FRAME+STEP+1, STEP)
@@ -189,9 +189,9 @@ for STEP in range(1,5,1):
     #-------------------
     # Ransac 8 pts
     #-------------------
-    print("\n--------------------------------")
-    print("Started RANSAC 8pt algorithm:")
-    print("--------------------------------")
+    print("\n\t--------------------------------")
+    print("\tStarted RANSAC 8pt algorithm:")
+    print("\t--------------------------------")
     
     min_err, min_F, min_RT, min_inliers_list = RANSAC_estimate_RT(pts_c, pts_p, camera, 
                         RANSAC_TIMES, RANSAC_INLIER_RATIO_THRESH)
@@ -275,7 +275,8 @@ ax.set_xlabel('X axis')
 ax.set_ylabel('Y axis')
 ax.set_zlabel('Z axis')
 ax.view_init(azim=-90, elev=-55)
-plt.show()
+plt.savefig("init_pcl.png")
+#plt.show()
 
 
 #-------------------------
@@ -308,55 +309,79 @@ print("pts_c:\n", reproj_pts_c[:3], "\n", inlier_pts_c[:3])
 
 
 #-----------------------------
-# Start 3rd frame
+# Start 2D-3D PnP procedure
 #-----------------------------
-# Read 2nd frame
-fr = START_FRAME+STEP+1 
-print("\n3rd frame ", fr, ":", frame_img_list[fr])
-frame2_ori = cv2.imread(frame_img_list[fr], cv2.IMREAD_GRAYSCALE)
-# Image undistortion
-frame2 = cv2.remap(frame2_ori, camera.mapx, camera.mapy, cv2.INTER_LINEAR, cv2.BORDER_TRANSPARENT, 0)
+print("\n--------------------------------")
+print("Start 2D-3D PnP procedure:\n")
+print("--------------------------------")
 
 # Use inlier points from 2D-2D pose estimate process above
 # Not sure why we must specify it as np.float32, otherwise opencv will assert. See here:
 # https://stackoverflow.com/questions/43063320/cv2-calcopticalflowpyrlk-adding-new-points
 p0 = inlier_pts_c[:,:-1].reshape(inlier_pts_c.shape[0],1,2).astype(np.float32)
 
-# Forward OF tracking
-p1, st, err = cv2.calcOpticalFlowPyrLK(frame1, frame2, p0, None, **of.lk_params)
+one_col = np.ones_like(inlier_pts_3D[:,0]).reshape(-1,1)
+inlier_pts_3D_tmp = np.hstack((inlier_pts_3D, one_col))
+pts_3d_last_frame = inlier_pts_3D_tmp.reshape(inlier_pts_3D_tmp.shape[0],1,4)
 
-# Successfully tracked points
-good_old = p0[st==1]
-good_new = p1[st==1]
-tmp = inlier_pts_3D.reshape(inlier_pts_3D.shape[0],1,3)
-good_3d_pts = tmp[st==1]
+frame_old = frame1
 
-# Visualization
-cur_rand_color = (np.random.rand(),0.7, np.random.rand(),1.0)
-# Draw optic flow on last frame (frame1)
-height, width = frame2.shape
-plt.imshow(frame2, cmap='gray', extent=[0,width,height,0])
-plt.title("3rd frame")
-plt.scatter(good_old[:,0], good_old[:,1], linestyle='-', c='g', s=2)
-plt.scatter(good_new[:,0], good_new[:,1], linestyle='-', c='r', s=2)
+# Read next frame
+for fr in range(START_FRAME+STEP+1, START_FRAME+STEP+8, 1):
 
-for idx in range(good_old.shape[0]):
-    plt.plot([good_old[idx,0], good_new[idx,0]],
-                    [good_old[idx,1], good_new[idx,1]],
-                    linestyle='-', color=cur_rand_color, markersize=0.25)
-plt.savefig("3rd_frame.png")
-plt.show()
+    print("\nnext frame ", fr, ":", frame_img_list[fr])
+    frame_new_ori = cv2.imread(frame_img_list[fr], cv2.IMREAD_GRAYSCALE)
+
+    # Image undistortion
+    frame_new = cv2.remap(frame_new_ori, camera.mapx, camera.mapy, cv2.INTER_LINEAR, cv2.BORDER_TRANSPARENT, 0)
+
+    # Forward OF tracking
+    p1, st, err = cv2.calcOpticalFlowPyrLK(frame_old, frame_new, p0, None, **of.lk_params)
+
+    # Successfully tracked points
+    good_old = p0[st==1]
+    good_new = p1[st==1]
+    good_3d_pts = pts_3d_last_frame[st==1]
+
+    # Visualization
+    cur_rand_color = (np.random.rand(),0.7, np.random.rand(),1.0)
+    # Draw optic flow on last frame (frame1)
+    height, width = frame_new.shape
+    plt.imshow(frame_new, cmap='gray', extent=[0,width,height,0])
+    plt.title("next frame")
+    plt.scatter(good_old[:,0], good_old[:,1], linestyle='-', c='g', s=2)
+    plt.scatter(good_new[:,0], good_new[:,1], linestyle='-', c='r', s=2)
+
+    for idx in range(good_old.shape[0]):
+        plt.plot([good_old[idx,0], good_new[idx,0]],
+                        [good_old[idx,1], good_new[idx,1]],
+                        linestyle='-', color=cur_rand_color, markersize=0.25)
+    plt.savefig("frame"+str(fr)+".png")
+    #plt.show()
+
+    # Construct homogeneous coordinates points
+    one_col = np.ones_like(good_new[:,0]).reshape(-1,1)
+    pts_2d = np.hstack((good_new[:,:2], one_col))
+    pts_3d = good_3d_pts
+
+    #-------------------------
+    # 2D-3D PnP ransac solver
+    #-------------------------
+    print("\n\t--------------------------------")
+    print("\tStarted 2D-3D PnP algorithm:")
+    print("\t--------------------------------")
     
-# Construct homogeneous coordinates points
-one_col = np.ones_like(good_new[:,0]).reshape(-1,1)
-pts_2d = np.hstack((good_new[:,:2], one_col))
-one_col = np.ones_like(good_3d_pts[:,0]).reshape(-1,1)
-pts_3d = np.hstack((good_3d_pts, one_col))
+    #R, T = linearPnP(pts_2d, pts_3d)
+    #eval_RT_2D_3D(R, T, pts_2d, pts_3d, camera.K)
+    min_err_pnp, min_R_pnp, min_T_pnp, min_inliers_list_pnp =  \
+            RANSAC_PnP(pts_2d, pts_3d, camera, RANSAC_TIMES=300, INLIER_RATIO_THRESH=0.6)
+    print("2D-3D PnP estimated: reproj_err=", min_err_pnp, 
+        "R=\n", min_R_pnp, "\nT=", min_T_pnp)
+    if min_err_pnp > 3.: # Too big error in reprojection
+        sys.exit('VO failed! Exit...')
 
-#-------------------------
-# 2D-3D PnP ransac solver
-#-------------------------
-#R, T = linearPnP(pts_2d, pts_3d)
-#eval_RT_2D_3D(R, T, pts_2d, pts_3d, camera.K)
-min_err_pnp, min_R_pnp, min_T_pnp, min_inliers_list_pnp = RANSAC_PnP(pts_2d, pts_3d, camera)
+    # Make current new frame old for next round
+    frame_old = frame_new
+    p0 = pts_2d[:,:-1].reshape(pts_2d.shape[0],1,2).astype(np.float32)
+    pts_3d_last_frame = pts_3d.reshape(pts_3d.shape[0],1,4)
 

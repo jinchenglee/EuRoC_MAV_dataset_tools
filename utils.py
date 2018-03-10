@@ -603,7 +603,7 @@ def ALLPOINTS_estimate_RT(pts_c, pts_p, camera):
 
 
 def RANSAC_estimate_RT(pts_c, pts_p, camera, 
-                    RANSAC_TIMES=100, INLIER_RATIO_THRESH=0.8):
+                    RANSAC_TIMES=200, INLIER_RATIO_THRESH=0.8):
     """
     Using RANSAC algorithm to randomly pick 8 point correspondences in
     current and previous frames to estimate best Fundamental Matrix F.
@@ -769,7 +769,7 @@ def eval_RT_2D_3D(R, T, pts_2d, pts_3d, K, SKIP_THRESH=2.):
     return error, inliers_cnt, inliers_list
 
 
-def RANSAC_PnP(pts_2d, pts_3d, camera, RANSAC_TIMES=1000, INLIER_RATIO_THRESH=0.6):
+def RANSAC_PnP(pts_2d, pts_3d, camera, RANSAC_TIMES=200, INLIER_RATIO_THRESH=0.8):
     """
     Using RANSAC algorithm to randomly pick 6 point correspondences in
     pts_2d and pts_3d to estimate best R,T matrices using linearPnP 
@@ -782,9 +782,14 @@ def RANSAC_PnP(pts_2d, pts_3d, camera, RANSAC_TIMES=1000, INLIER_RATIO_THRESH=0.
     min_inliers_list = []
     min_R = np.empty((3,3))
     min_T = np.empty((3,))
+
     # Use all points to estimate initial value
     min_R, min_T = linearPnP(pts_2d, pts_3d, camera.K)
+    init_all_pts_err, inliers_cnt, min_inliers_list = eval_RT_2D_3D(min_R, min_T, pts_2d, pts_3d, camera.K)
+    print("RANSAC_PnP(): All points used. Mean reproj error: ", min_err, 
+        "Inlier/total=", inliers_cnt, "/", pts_2d.shape[0])
 
+    min_err = init_all_pts_err
     for i in range(RANSAC_TIMES):
         ransac_6 = np.random.randint(0, pts_2d.shape[0], size=6)
         rand_pts_2d = pts_2d[ransac_6]
@@ -797,12 +802,15 @@ def RANSAC_PnP(pts_2d, pts_3d, camera, RANSAC_TIMES=1000, INLIER_RATIO_THRESH=0.
         err, inliers_cnt, inliers_list = eval_RT_2D_3D(R, T, pts_2d, pts_3d, camera.K)
 
         if err < min_err and (inliers_cnt/pts_2d.shape[0])>INLIER_RATIO_THRESH:
-            print("Mean reproj error: ", err, "Inlier/total=", inliers_cnt, "/", pts_2d.shape[0])
+            print("RANSAC_PnP(): Mean reproj error: ", err, "Inlier/total=", inliers_cnt, "/", pts_2d.shape[0])
 
             min_err = err.copy()
             min_R = R
             min_T = T
             min_inliers_list = inliers_list
+
+    if min_err==init_all_pts_err:
+        print("RANSAC_PnP(): Failed! Use all points estimated R,T instead.")
 
     return min_err, min_R, min_T, min_inliers_list
 
