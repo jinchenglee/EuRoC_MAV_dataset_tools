@@ -660,7 +660,7 @@ def RANSAC_estimate_RT(pts_c, pts_p, camera,
 
     return min_err, min_F, min_RT, min_inliers_list
 
-def linearPnP(pts_2d, pts_3d):
+def linearPnP(pts_2d, pts_3d, K):
     """
     Every 2d pt (u,v,1) and 3d pt (X,Y,Z,1) provide two equations:
     | 0 0 0 0 X Y Z 1 -vX -vY -vZ -v | 
@@ -669,13 +669,19 @@ def linearPnP(pts_2d, pts_3d):
 
     Using 6 correspondences we can linearly solve T_3x4 matrix. 
 
+    K is camera intrinsics.
+
     Then we recover R,T by map T_3x4 onto SO3 for best estimate R using
     SVD trick.
 
     Input pts_2d and pts_3d are expected in homogeneous coordinates.
     """
-    u = pts_2d[:,0]
-    v = pts_2d[:,1]
+
+    # Convert coordinates from image to canonical plane
+    pts_2d_cp = pts_2d.dot(np.linalg.inv(K).T)
+
+    u = pts_2d_cp[:,0]
+    v = pts_2d_cp[:,1]
     X = pts_3d[:,0]
     Y = pts_3d[:,1]
     Z = pts_3d[:,2]
@@ -718,7 +724,7 @@ def linearPnP(pts_2d, pts_3d):
 
 
 
-def eval_RT_2D_3D(R, T, pts_2d, pts_3d, K, SKIP_THRESH=100.):
+def eval_RT_2D_3D(R, T, pts_2d, pts_3d, K, SKIP_THRESH=2.):
     """
     Evaluate matrices R, T from PnP estimation. 
 
@@ -777,7 +783,7 @@ def RANSAC_PnP(pts_2d, pts_3d, camera, RANSAC_TIMES=1000, INLIER_RATIO_THRESH=0.
     min_R = np.empty((3,3))
     min_T = np.empty((3,))
     # Use all points to estimate initial value
-    min_R, min_T = linearPnP(pts_2d, pts_3d)
+    min_R, min_T = linearPnP(pts_2d, pts_3d, camera.K)
 
     for i in range(RANSAC_TIMES):
         ransac_6 = np.random.randint(0, pts_2d.shape[0], size=6)
@@ -785,7 +791,7 @@ def RANSAC_PnP(pts_2d, pts_3d, camera, RANSAC_TIMES=1000, INLIER_RATIO_THRESH=0.
         rand_pts_3d = pts_3d[ransac_6]
 
         # Estimate RT matrix from E
-        R, T = linearPnP(rand_pts_2d, rand_pts_3d)
+        R, T = linearPnP(rand_pts_2d, rand_pts_3d, camera.K)
 
         # Reproj erorr
         err, inliers_cnt, inliers_list = eval_RT_2D_3D(R, T, pts_2d, pts_3d, camera.K)
