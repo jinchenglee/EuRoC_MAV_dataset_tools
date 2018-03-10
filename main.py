@@ -356,5 +356,7 @@ pts_3d = np.hstack((good_3d_pts, one_col))
 #-------------------------
 # 2D-3D PnP ransac solver
 #-------------------------
- R, T = linearPnP(pts_2d, pts_3d)
+#R, T = linearPnP(pts_2d, pts_3d)
+#eval_RT_2D_3D(R, T, pts_2d, pts_3d, camera.K)
+min_err_pnp, min_R_pnp, min_T_pnp, min_inliers_list_pnp = RANSAC_PnP(pts_2d, pts_3d, camera)
 
