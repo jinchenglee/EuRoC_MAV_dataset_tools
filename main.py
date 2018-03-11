@@ -343,6 +343,8 @@ for fr in range(START_FRAME+STEP+1, START_FRAME+STEP+8, 1):
     good_new = p1[st==1]
     good_3d_pts = pts_3d_last_frame[st==1]
 
+    print("OpticalFlow: total ", p0.shape[0], " features, successfully tracked ", good_old.shape[0])
+
     # Construct homogeneous coordinates points
     one_col = np.ones_like(good_new[:,0]).reshape(-1,1)
     pts_2d = np.hstack((good_new[:,:2], one_col))
@@ -389,8 +391,10 @@ for fr in range(START_FRAME+STEP+1, START_FRAME+STEP+8, 1):
     plt.savefig("frame"+str(fr)+".png")
     #plt.show()
 
-    # Make current new frame old for next round
+    # Make current new frame old for next round, and only keep inliers
     frame_old = frame_new
-    p0 = pts_2d[:,:-1].reshape(pts_2d.shape[0],1,2).astype(np.float32)
-    pts_3d_last_frame = pts_3d.reshape(pts_3d.shape[0],1,4)
+    inlier_pts_2d = pts_2d[min_inliers_list_pnp]
+    inlier_pts_3d = pts_3d[min_inliers_list_pnp]
+    p0 = inlier_pts_2d[:,:-1].reshape(inlier_pts_2d.shape[0],1,2).astype(np.float32)
+    pts_3d_last_frame = inlier_pts_3d.reshape(inlier_pts_3d.shape[0],1,4)
 
