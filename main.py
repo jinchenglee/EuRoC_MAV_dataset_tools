@@ -364,7 +364,7 @@ for fr in range(START_FRAME+STEP+1, START_FRAME+STEP+8, 1):
     #R, T = linearPnP(pts_2d, pts_3d)
     #eval_RT_2D_3D(R, T, pts_2d, pts_3d, camera.K)
     success, min_err_pnp, min_R_pnp, min_T_pnp, min_inliers_list_pnp =  \
-            RANSAC_PnP(pts_2d, pts_3d, camera, RANSAC_TIMES=300, INLIER_RATIO_THRESH=0.6)
+            RANSAC_PnP(pts_2d, pts_3d, camera, RANSAC_TIMES=500, INLIER_RATIO_THRESH=0.6)
     print("2D-3D PnP estimated: reproj_err=", min_err_pnp, 
         "\nR=", min_R_pnp, "\nT=", min_T_pnp)
     if success!=True: 

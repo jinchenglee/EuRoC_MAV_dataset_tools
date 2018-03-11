@@ -788,7 +788,7 @@ def RANSAC_PnP(pts_2d, pts_3d, camera, RANSAC_TIMES=200, INLIER_RATIO_THRESH=0.8
     # Use all points to estimate initial value
     min_R, min_T = linearPnP(pts_2d, pts_3d, camera.K)
     init_all_pts_err, inliers_cnt, min_inliers_list = eval_RT_2D_3D(min_R, min_T, pts_2d, pts_3d, camera.K)
-    print("RANSAC_PnP(): init with all points. Mean reproj error: ", min_err, 
+    print("RANSAC_PnP(): init with all points. Mean reproj error: ", init_all_pts_err, 
         "Inlier/total=", inliers_cnt, "/", pts_2d.shape[0])
 
     min_err = init_all_pts_err
