@@ -54,11 +54,13 @@ RANSAC_INLIER_RATIO_THRESH = 0.6
 # List of camera data
 frame_img_list = np.sort(glob.glob(basedir+'mav0/cam0/data/*.png'))
 
-START_FRAME = 1321 # A good frame to try normal initialization.
+#START_FRAME = 1321 # A good frame to try normal initialization.
+START_FRAME = 2678
+#START_FRAME = 0
+
 #START_FRAME = 465 # Static scene, expect large ave(Z)
 #START_FRAME = 893 # From static to move within 5 frames. Expect large ave(Z) then successfully init.
 #START_FRAME = 324 # Almost all features on same plane, expect H matrix instead of F/E.
-#START_FRAME = 0
 
 #-------------------
 # Iterate until successful initialization, OR failure.
@@ -134,6 +136,8 @@ for STEP in range(1,5,1):
     # Successfully tracked points
     good_old = p0[st==1]
     good_new = p1[st==1]
+
+    print("OpticalFlow: total ", p0.shape[0], " features, successfully tracked ", good_old.shape[0])
     
     ## Visualization
     #cur_rand_color = (np.random.rand(),0.7, np.random.rand(),1.0)
@@ -312,7 +316,7 @@ print("pts_c:\n", reproj_pts_c[:3], "\n", inlier_pts_c[:3])
 # Start 2D-3D PnP procedure
 #-----------------------------
 print("\n--------------------------------")
-print("Start 2D-3D PnP procedure:\n")
+print("Start 2D-3D PnP procedure:")
 print("--------------------------------")
 
 # Use inlier points from 2D-2D pose estimate process above
@@ -364,14 +368,14 @@ for fr in range(START_FRAME+STEP+1, START_FRAME+STEP+8, 1):
     print("2D-3D PnP estimated: reproj_err=", min_err_pnp, 
         "\nR=", min_R_pnp, "\nT=", min_T_pnp)
     if success!=True: 
-        sys.exit('VO failed! Exit...')
+        sys.exit('VO failed in 2D-3D PnP! Exit...')
 
 
     # Visualization
     height, width = frame_new.shape
     fig = plt.figure()
     plt.imshow(frame_new, cmap='gray', extent=[0,width,height,0])
-    plt.title("frame"+str(fr))
+    plt.title("2D-3D PnP - frame"+str(fr))
     # Draw all points
     plt.scatter(good_old[:,0], good_old[:,1], linestyle='-', c='g', s=2)
     plt.scatter(good_new[:,0], good_new[:,1], linestyle='-', c='r', s=2)

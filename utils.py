@@ -779,6 +779,7 @@ def RANSAC_PnP(pts_2d, pts_3d, camera, RANSAC_TIMES=200, INLIER_RATIO_THRESH=0.8
     """
 
     min_err = 1e8
+    inliers_cnt = 0
     min_inliers_list = []
     min_R = np.empty((3,3))
     min_T = np.empty((3,))
