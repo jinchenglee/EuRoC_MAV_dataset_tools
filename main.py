@@ -208,7 +208,7 @@ for STEP in range(1,5,1):
     print("Fundamental Matrix from normalized 8-point algorithm:\n", min_F)
     print("Estimated pose RT:\n", min_RT)
     
-    # Visualization
+    # Visualization inliers/outliers in different color
     # Plotting the remapped points according to epipolar lines
     #plot_points_on_images(pts_c, pts_p, frame0, frame1, min_F)
     plt.imshow(frame1, cmap='gray')
@@ -343,22 +343,6 @@ for fr in range(START_FRAME+STEP+1, START_FRAME+STEP+8, 1):
     good_new = p1[st==1]
     good_3d_pts = pts_3d_last_frame[st==1]
 
-    # Visualization
-    cur_rand_color = (np.random.rand(),0.7, np.random.rand(),1.0)
-    # Draw optic flow on last frame (frame1)
-    height, width = frame_new.shape
-    plt.imshow(frame_new, cmap='gray', extent=[0,width,height,0])
-    plt.title("next frame")
-    plt.scatter(good_old[:,0], good_old[:,1], linestyle='-', c='g', s=2)
-    plt.scatter(good_new[:,0], good_new[:,1], linestyle='-', c='r', s=2)
-
-    for idx in range(good_old.shape[0]):
-        plt.plot([good_old[idx,0], good_new[idx,0]],
-                        [good_old[idx,1], good_new[idx,1]],
-                        linestyle='-', color=cur_rand_color, markersize=0.25)
-    plt.savefig("frame"+str(fr)+".png")
-    #plt.show()
-
     # Construct homogeneous coordinates points
     one_col = np.ones_like(good_new[:,0]).reshape(-1,1)
     pts_2d = np.hstack((good_new[:,:2], one_col))
@@ -373,12 +357,37 @@ for fr in range(START_FRAME+STEP+1, START_FRAME+STEP+8, 1):
     
     #R, T = linearPnP(pts_2d, pts_3d)
     #eval_RT_2D_3D(R, T, pts_2d, pts_3d, camera.K)
-    min_err_pnp, min_R_pnp, min_T_pnp, min_inliers_list_pnp =  \
+    success, min_err_pnp, min_R_pnp, min_T_pnp, min_inliers_list_pnp =  \
             RANSAC_PnP(pts_2d, pts_3d, camera, RANSAC_TIMES=300, INLIER_RATIO_THRESH=0.6)
     print("2D-3D PnP estimated: reproj_err=", min_err_pnp, 
-        "R=\n", min_R_pnp, "\nT=", min_T_pnp)
-    if min_err_pnp > 3.: # Too big error in reprojection
+        "\nR=", min_R_pnp, "\nT=", min_T_pnp)
+    if success!=True: 
         sys.exit('VO failed! Exit...')
+
+
+    # Visualization
+    height, width = frame_new.shape
+    fig = plt.figure()
+    plt.imshow(frame_new, cmap='gray', extent=[0,width,height,0])
+    plt.title("frame"+str(fr))
+    # Draw all points
+    plt.scatter(good_old[:,0], good_old[:,1], linestyle='-', c='g', s=2)
+    plt.scatter(good_new[:,0], good_new[:,1], linestyle='-', c='r', s=2)
+    # Draw all inliers optical flow
+    inlier_color = (0.1, 0.7, 0.3, 1.0)
+    for idx in min_inliers_list_pnp:
+        plt.plot([good_old[idx,0], good_new[idx,0]], 
+                    [good_old[idx,1], good_new[idx,1]], 
+                    linestyle='-', color=inlier_color, markersize=0.25)
+    # Draw outliers optical flow
+    outlier_color = (0.8, 0.1, 0.1, 0.7)
+    for idx in range(good_old.shape[0]):
+        if idx not in min_inliers_list_pnp:
+            plt.plot([good_old[idx,0], good_new[idx,0]], 
+                    [good_old[idx,1], good_new[idx,1]], 
+                    linestyle='-', color=outlier_color, markersize=0.25)
+    plt.savefig("frame"+str(fr)+".png")
+    #plt.show()
 
     # Make current new frame old for next round
     frame_old = frame_new

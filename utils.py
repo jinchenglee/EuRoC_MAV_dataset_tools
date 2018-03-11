@@ -782,11 +782,12 @@ def RANSAC_PnP(pts_2d, pts_3d, camera, RANSAC_TIMES=200, INLIER_RATIO_THRESH=0.8
     min_inliers_list = []
     min_R = np.empty((3,3))
     min_T = np.empty((3,))
+    success = False
 
     # Use all points to estimate initial value
     min_R, min_T = linearPnP(pts_2d, pts_3d, camera.K)
     init_all_pts_err, inliers_cnt, min_inliers_list = eval_RT_2D_3D(min_R, min_T, pts_2d, pts_3d, camera.K)
-    print("RANSAC_PnP(): All points used. Mean reproj error: ", min_err, 
+    print("RANSAC_PnP(): init with all points. Mean reproj error: ", min_err, 
         "Inlier/total=", inliers_cnt, "/", pts_2d.shape[0])
 
     min_err = init_all_pts_err
@@ -808,11 +809,12 @@ def RANSAC_PnP(pts_2d, pts_3d, camera, RANSAC_TIMES=200, INLIER_RATIO_THRESH=0.8
             min_R = R
             min_T = T
             min_inliers_list = inliers_list
+            success = True
 
     if min_err==init_all_pts_err:
-        print("RANSAC_PnP(): Failed! Use all points estimated R,T instead.")
+        print("RANSAC_PnP(): Failed!\n")
 
-    return min_err, min_R, min_T, min_inliers_list
+    return success, min_err, min_R, min_T, min_inliers_list
 
 
 def triangulate(inlier_pts_c, inlier_pts_p, camera, min_RT):
