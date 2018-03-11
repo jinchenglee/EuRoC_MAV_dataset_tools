@@ -780,6 +780,7 @@ def RANSAC_PnP(pts_2d, pts_3d, camera, RANSAC_TIMES=200, INLIER_RATIO_THRESH=0.8
 
     min_err = 1e8
     inliers_cnt = 0
+    inliers_ratio = 0.
     min_inliers_list = []
     min_R = np.empty((3,3))
     min_T = np.empty((3,))
@@ -788,6 +789,7 @@ def RANSAC_PnP(pts_2d, pts_3d, camera, RANSAC_TIMES=200, INLIER_RATIO_THRESH=0.8
     # Use all points to estimate initial value
     min_R, min_T = linearPnP(pts_2d, pts_3d, camera.K)
     init_all_pts_err, inliers_cnt, min_inliers_list = eval_RT_2D_3D(min_R, min_T, pts_2d, pts_3d, camera.K)
+    inliers_ratio = inliers_cnt/pts_2d.shape[0]
     print("RANSAC_PnP(): init with all points. Mean reproj error: ", init_all_pts_err, 
         "Inlier/total=", inliers_cnt, "/", pts_2d.shape[0])
 
@@ -803,7 +805,8 @@ def RANSAC_PnP(pts_2d, pts_3d, camera, RANSAC_TIMES=200, INLIER_RATIO_THRESH=0.8
         # Reproj erorr
         err, inliers_cnt, inliers_list = eval_RT_2D_3D(R, T, pts_2d, pts_3d, camera.K)
 
-        if err < min_err and (inliers_cnt/pts_2d.shape[0])>INLIER_RATIO_THRESH:
+        inliers_ratio = inliers_cnt/pts_2d.shape[0]
+        if err < min_err and inliers_ratio>INLIER_RATIO_THRESH:
             print("RANSAC_PnP(): Mean reproj error: ", err, "Inlier/total=", inliers_cnt, "/", pts_2d.shape[0])
 
             min_err = err.copy()
@@ -812,8 +815,12 @@ def RANSAC_PnP(pts_2d, pts_3d, camera, RANSAC_TIMES=200, INLIER_RATIO_THRESH=0.8
             min_inliers_list = inliers_list
             success = True
 
-    if min_err==init_all_pts_err:
+    if min_err>0.8: # TODO: what's a good threshold to kill?
+        # Sometimes all points initialized estimation is good enough.
         print("RANSAC_PnP(): Failed!\n")
+        success = False
+    else:
+        success = True
 
     return success, min_err, min_R, min_T, min_inliers_list
 

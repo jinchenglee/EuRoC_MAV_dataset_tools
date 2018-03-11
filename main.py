@@ -55,8 +55,8 @@ RANSAC_INLIER_RATIO_THRESH = 0.6
 frame_img_list = np.sort(glob.glob(basedir+'mav0/cam0/data/*.png'))
 
 #START_FRAME = 1321 # A good frame to try normal initialization.
-START_FRAME = 2678
-#START_FRAME = 0
+#START_FRAME = 2678
+START_FRAME = 3000
 
 #START_FRAME = 465 # Static scene, expect large ave(Z)
 #START_FRAME = 893 # From static to move within 5 frames. Expect large ave(Z) then successfully init.
@@ -215,7 +215,14 @@ for STEP in range(1,5,1):
     # Visualization inliers/outliers in different color
     # Plotting the remapped points according to epipolar lines
     #plot_points_on_images(pts_c, pts_p, frame0, frame1, min_F)
-    plt.imshow(frame1, cmap='gray')
+    height, width = frame1.shape
+    fig = plt.figure()
+    plt.imshow(frame1, cmap='gray', extent=[0,width,height,0])
+    plt.title("2D-2D Init - frame "+str(fr))
+    plt.xticks([])
+    plt.yticks([])
+    plt.xlim(0,width)
+    plt.ylim(height,0)
     # Draw all inliers optical flow
     inlier_color = (0.1, 0.7, 0.3, 1.0)
     for idx in min_inliers_list:
@@ -232,6 +239,7 @@ for STEP in range(1,5,1):
     # Draw all points
     plt.scatter(pts_p[:,0], pts_p[:,1], linestyle='-', c='g', s=2)
     plt.scatter(pts_c[:,0], pts_c[:,1], linestyle='-', c='r', s=2)
+    plt.savefig("frame"+str(fr)+".png")
     plt.savefig("8pt_alg_ransac.png")
     #plt.show()
     
@@ -331,7 +339,7 @@ pts_3d_last_frame = inlier_pts_3D_tmp.reshape(inlier_pts_3D_tmp.shape[0],1,4)
 frame_old = frame1
 
 # Read next frame
-for fr in range(START_FRAME+STEP+1, START_FRAME+STEP+8, 1):
+for fr in range(START_FRAME+STEP+1, START_FRAME+STEP+15, 1):
 
     print("\nnext frame ", fr, ":", frame_img_list[fr])
     frame_new_ori = cv2.imread(frame_img_list[fr], cv2.IMREAD_GRAYSCALE)
@@ -367,7 +375,7 @@ for fr in range(START_FRAME+STEP+1, START_FRAME+STEP+8, 1):
             RANSAC_PnP(pts_2d, pts_3d, camera, RANSAC_TIMES=500, INLIER_RATIO_THRESH=0.6)
     print("2D-3D PnP estimated: reproj_err=", min_err_pnp, 
         "\nR=", min_R_pnp, "\nT=", min_T_pnp)
-    if success!=True: 
+    if success==False: 
         sys.exit('VO failed in 2D-3D PnP! Exit...')
 
 
@@ -375,7 +383,11 @@ for fr in range(START_FRAME+STEP+1, START_FRAME+STEP+8, 1):
     height, width = frame_new.shape
     fig = plt.figure()
     plt.imshow(frame_new, cmap='gray', extent=[0,width,height,0])
-    plt.title("2D-3D PnP - frame"+str(fr))
+    plt.title("2D-3D PnP - frame "+str(fr))
+    plt.xticks([])
+    plt.yticks([])
+    plt.xlim(0,width)
+    plt.ylim(height,0)
     # Draw all points
     plt.scatter(good_old[:,0], good_old[:,1], linestyle='-', c='g', s=2)
     plt.scatter(good_new[:,0], good_new[:,1], linestyle='-', c='r', s=2)
