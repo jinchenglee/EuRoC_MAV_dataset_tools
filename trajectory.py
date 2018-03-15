@@ -19,8 +19,16 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
 
-fr1 = 8600
-fr2 = 10000
+#fr1 = 8600
+#fr2 = 10000
+fr1 = 28600
+fr2 = 30000
+
+def draw_oxyz(ax, OXYZ):
+    ax.plot([OXYZ[0,0], OXYZ[1,0]], [OXYZ[0,1], OXYZ[1,1]], [OXYZ[0,2], OXYZ[1,2]],c='r')
+    ax.plot([OXYZ[0,0], OXYZ[2,0]], [OXYZ[0,1], OXYZ[2,1]], [OXYZ[0,2], OXYZ[2,2]],c='g')
+    ax.plot([OXYZ[0,0], OXYZ[3,0]], [OXYZ[0,1], OXYZ[3,1]], [OXYZ[0,2], OXYZ[3,2]],c='b')
+
 
 def q2R(w, x, y, z):
     """
@@ -54,7 +62,7 @@ def q2R(w, x, y, z):
       
     return R
 
-basedir = '/Users/jinchengli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/'
+basedir = '/Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/'
 # Load cam0 sensor config\n",
 with open(basedir+'mav0/cam0/sensor.yaml') as fp:
     cam0_yaml = yaml.load(fp)
@@ -132,68 +140,16 @@ ax.set_zlabel('z')
 ax.view_init(azim=60, elev=50)
 #plt.show()
 
+OXYZ = np.array([[0,0,0],[1,0,0],[0,1,0],[0,0,1]])
 
+tmp = T_WL[fr1][:,:-1].dot(OXYZ.T) + T_WL[fr1][:,-1].reshape(3,1)
+OXYZ1 = tmp.T
+tmp = T_WL[fr2][:,:-1].dot(OXYZ.T) + T_WL[fr2][:,-1].reshape(3,1)
+OXYZ2 = tmp.T
 
-
-
-
-
-#fig = plt.figure()
-#ax = fig.gca(projection='3d')
-x = [0,1,0]
-y = [0,0,0]
-z = [0,0,0]
-ax.plot(x,y,z,c='r')
-x_ = T_WL[fr1][:,:-1].dot(np.array([0,0,0]).T)+T_WL[fr1][:,-1]
-y_ = T_WL[fr1][:,:-1].dot(np.array([1,0,0]).T)+T_WL[fr1][:,-1]
-x = [x_[0], y_[0]]
-y = [x_[1], y_[1]]
-z = [x_[2], y_[2]]
-print(x,y,z)
-ax.plot(x,y,z,c='r')
-x_ = T_WL[fr2][:,:-1].dot(np.array([0,0,0]).T)+T_WL[fr2][:,-1]
-y_ = T_WL[fr2][:,:-1].dot(np.array([1,0,0]).T)+T_WL[fr2][:,-1]
-x = [x_[0], y_[0]]
-y = [x_[1], y_[1]]
-z = [x_[2], y_[2]]
-print(x,y,z)
-ax.plot(x,y,z,c='r')
-
-
-x = [0,0,0]
-y = [0,1,0]
-z = [0,0,0]
-ax.plot(x,y,z,c='g')
-x_ = T_WL[fr1][:,:-1].dot(np.array([0,0,0]).T)+T_WL[fr1][:,-1]
-y_ = T_WL[fr1][:,:-1].dot(np.array([0,1,0]).T)+T_WL[fr1][:,-1]
-x = [x_[0], y_[0]]
-y = [x_[1], y_[1]]
-z = [x_[2], y_[2]]
-ax.plot(x,y,z,c='g')
-x_ = T_WL[fr2][:,:-1].dot(np.array([0,0,0]).T)+T_WL[fr2][:,-1]
-y_ = T_WL[fr2][:,:-1].dot(np.array([0,1,0]).T)+T_WL[fr2][:,-1]
-x = [x_[0], y_[0]]
-y = [x_[1], y_[1]]
-z = [x_[2], y_[2]]
-ax.plot(x,y,z,c='g')
-
-x = [0,0,0]
-y = [0,0,0]
-z = [0,0,1]
-ax.plot(x,y,z,c='b')
-x_ = T_WL[fr1][:,:-1].dot(np.array([0,0,0]).T)+T_WL[fr1][:,-1]
-y_ = T_WL[fr1][:,:-1].dot(np.array([0,0,1]).T)+T_WL[fr1][:,-1]
-x = [x_[0], y_[0]]
-y = [x_[1], y_[1]]
-z = [x_[2], y_[2]]
-ax.plot(x,y,z,c='b')
-x_ = T_WL[fr2][:,:-1].dot(np.array([0,0,0]).T)+T_WL[fr2][:,-1]
-y_ = T_WL[fr2][:,:-1].dot(np.array([0,0,1]).T)+T_WL[fr2][:,-1]
-x = [x_[0], y_[0]]
-y = [x_[1], y_[1]]
-z = [x_[2], y_[2]]
-ax.plot(x,y,z,c='b')
-
+draw_oxyz(ax, OXYZ)
+draw_oxyz(ax, OXYZ1)
+draw_oxyz(ax, OXYZ2)
 
 ax.set_xlabel('x')
 ax.set_ylabel('y')

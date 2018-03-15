@@ -55,8 +55,8 @@ RANSAC_INLIER_RATIO_THRESH = 0.6
 frame_img_list = np.sort(glob.glob(basedir+'mav0/cam0/data/*.png'))
 
 #START_FRAME = 1321 # A good frame to try normal initialization.
-#START_FRAME = 2678
-START_FRAME = 3000
+START_FRAME = 2679
+#START_FRAME = 3000
 
 #START_FRAME = 465 # Static scene, expect large ave(Z)
 #START_FRAME = 893 # From static to move within 5 frames. Expect large ave(Z) then successfully init.
