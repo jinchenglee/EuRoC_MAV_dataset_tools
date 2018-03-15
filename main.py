@@ -38,6 +38,10 @@ basedir = '/Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_
 pid = point_id() # point ID
 #fid = 0 # frame ID
 
+# List
+R_mat = []
+T_vec = []
+
 #-------------
 # Global Parameters
 #-------------
@@ -55,8 +59,9 @@ RANSAC_INLIER_RATIO_THRESH = 0.6
 frame_img_list = np.sort(glob.glob(basedir+'mav0/cam0/data/*.png'))
 
 #START_FRAME = 1321 # A good frame to try normal initialization.
-START_FRAME = 2679
+#START_FRAME = 2679
 #START_FRAME = 3000
+START_FRAME = 1397 # ~1411 Rotation dominant?
 
 #START_FRAME = 465 # Static scene, expect large ave(Z)
 #START_FRAME = 893 # From static to move within 5 frames. Expect large ave(Z) then successfully init.
@@ -261,6 +266,8 @@ for STEP in range(1,5,1):
         print("Feature average depth(Z) from Triangulation too big, it is:", ave_Z, 
                 " threshold = ", AVE_Z_THRESH)
     else:
+        R_mat.append(min_RT[:,:-1])
+        T_vec.append(min_RT[:,-1])
         break # Successful initialized.
 
     if STEP==5:
@@ -376,7 +383,11 @@ for fr in range(START_FRAME+STEP+1, START_FRAME+STEP+15, 1):
     print("2D-3D PnP estimated: reproj_err=", min_err_pnp, 
         "\nR=", min_R_pnp, "\nT=", min_T_pnp)
     if success==False: 
-        sys.exit('VO failed in 2D-3D PnP! Exit...')
+        print('VO failed in 2D-3D PnP! ')
+        break
+    else:
+        R_mat.append(min_R_pnp)
+        T_vec.append(min_T_pnp)
 
 
     # Visualization
@@ -414,3 +425,41 @@ for fr in range(START_FRAME+STEP+1, START_FRAME+STEP+15, 1):
     p0 = inlier_pts_2d[:,:-1].reshape(inlier_pts_2d.shape[0],1,2).astype(np.float32)
     pts_3d_last_frame = inlier_pts_3d.reshape(inlier_pts_3d.shape[0],1,4)
 
+
+#----------------------------------
+# Visualization of trajectory
+#----------------------------------
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+
+# Draw point cloud
+#ax.scatter3D(inlier_pts_3D[:,0], inlier_pts_3D[:,1], inlier_pts_3D[:,2], c=inlier_pts_3D[:,2],
+#        label='Features Point Cloud')
+
+ax.legend()
+ax.set_xlabel('x')
+ax.set_ylabel('y')
+ax.set_zlabel('z')
+ax.set_aspect('equal')
+# Top-down view?
+#ax.view_init(azim=270, elev=90)
+#
+ax.view_init(azim=60, elev=50)
+#plt.show()
+
+# Draw world origin
+OXYZ = np.array([[0,0,0],[1,0,0],[0,1,0],[0,0,1]])
+#draw_oxyz(ax, OXYZ)
+
+for i in range(len(R_mat)):
+    Rotation = R_mat[i]
+    Translation = T_vec[i]
+    tmp = Rotation.dot(OXYZ.T) + Translation.reshape(3,1)
+    OXYZ1 = tmp.T
+    draw_oxyz(ax, OXYZ1)
+
+#ax.set_xlabel('x')
+#ax.set_ylabel('y')
+#ax.set_zlabel('z')
+#ax.set_aspect('equal')
+plt.show()
