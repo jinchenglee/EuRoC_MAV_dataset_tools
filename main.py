@@ -6,6 +6,7 @@ import glob
 import yaml
 import csv
 import sys
+import re
 
 import scipy
 import scipy.linalg 
@@ -38,9 +39,16 @@ basedir = '/Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_
 pid = point_id() # point ID
 #fid = 0 # frame ID
 
-# List
+# List to record estimated R|T
 R_mat = []
 T_vec = []
+
+# List to keep track of used frames to estimate R|T
+used_frame_list = []
+
+# Load pre-processed files from MAV dataset
+T_WL = np.load("T_WL.npy")
+TS = np.load("TS.npy").tolist()
 
 #-------------
 # Global Parameters
@@ -58,10 +66,10 @@ RANSAC_INLIER_RATIO_THRESH = 0.6
 # List of camera data
 frame_img_list = np.sort(glob.glob(basedir+'mav0/cam0/data/*.png'))
 
-#START_FRAME = 1321 # A good frame to try normal initialization.
+START_FRAME = 1321 # A good frame to try normal initialization.
 #START_FRAME = 2679
 #START_FRAME = 3000
-START_FRAME = 1397 # ~1411 Rotation dominant?
+#START_FRAME = 1387 # ~1411 Rotation dominant?
 
 #START_FRAME = 465 # Static scene, expect large ave(Z)
 #START_FRAME = 893 # From static to move within 5 frames. Expect large ave(Z) then successfully init.
@@ -266,8 +274,12 @@ for STEP in range(1,5,1):
         print("Feature average depth(Z) from Triangulation too big, it is:", ave_Z, 
                 " threshold = ", AVE_Z_THRESH)
     else:
+        # Record R|T successfully estimated from 2D-2D process
         R_mat.append(min_RT[:,:-1])
         T_vec.append(min_RT[:,-1])
+        # Record the two frames used in the successful 2D-2D process
+        used_frame_list.append(frame_img_list[frame_range[0]])
+        used_frame_list.append(frame_img_list[fr])
         break # Successful initialized.
 
     if STEP==5:
@@ -386,8 +398,11 @@ for fr in range(START_FRAME+STEP+1, START_FRAME+STEP+15, 1):
         print('VO failed in 2D-3D PnP! ')
         break
     else:
+        # Record successfully estimated R|T in 2D-3D process
         R_mat.append(min_R_pnp)
         T_vec.append(min_T_pnp)
+        # Record the frame used in the successful 2D-3D process
+        used_frame_list.append(frame_img_list[fr])
 
 
     # Visualization
@@ -432,10 +447,6 @@ for fr in range(START_FRAME+STEP+1, START_FRAME+STEP+15, 1):
 fig = plt.figure()
 ax = fig.gca(projection='3d')
 
-# Draw point cloud
-#ax.scatter3D(inlier_pts_3D[:,0], inlier_pts_3D[:,1], inlier_pts_3D[:,2], c=inlier_pts_3D[:,2],
-#        label='Features Point Cloud')
-
 ax.legend()
 ax.set_xlabel('x')
 ax.set_ylabel('y')
@@ -447,19 +458,82 @@ ax.set_aspect('equal')
 ax.view_init(azim=60, elev=50)
 #plt.show()
 
-# Draw world origin
-OXYZ = np.array([[0,0,0],[1,0,0],[0,1,0],[0,0,1]])
-#draw_oxyz(ax, OXYZ)
 
+
+# Regular expression to extract timestamp number from frame file name
+timestamp_fr = []
+p = re.compile(".+\/(\d+)\.png")
+for frame_file_name in used_frame_list:
+    tmp = p.search(frame_file_name).group(1)
+    timestamp_fr.append(int(tmp))
+
+# Make sure first and second frames (2D-2D) are in ground-truth list.
+# As monocular VO has scale ambiguity, need this to recover absolute
+# scale for estimation vs. ground-truth comparison.
+if timestamp_fr[0] not in TS:
+    sys.exit("Frame 0 (", str(timestamp_fr[0]), " not in ground-truth")
+else:
+    idx0 = TS.index(timestamp_fr[0])
+    # ground-truth origin to first frame camera origin (new world origin)
+    R_w2c = T_WL[idx0][:,:-1]
+    inv_R_w2c = np.linalg.inv(R_w2c)
+    T_w2c = T_WL[idx0][:,-1].reshape(3,1)
+
+if timestamp_fr[1] not in TS:
+    sys.exit("Frame 1 (", str(timestamp_fr[1]), " not in ground-truth")
+
+# Extract ground truth
+gt_R = []
+gt_T = []
+for i in range(1,len(timestamp_fr)-1,1):
+    if timestamp_fr[i] in TS:
+        idx = TS.index(timestamp_fr[i])
+        R_w2c_new = T_WL[idx][:,:-1]
+        T_w2c_new = T_WL[idx][:,-1].reshape(3,1)
+        # Calculate the ground truth of relative R|T
+        # R_new = R_cam2new R_w2c -> R_old2new = R_new * R_w2c^-1
+        gt_R.append(R_w2c_new.dot(inv_R_w2c))
+        # T_old2new = T_new - T_old
+        gt_T.append(R_w2c.dot(T_w2c_new-T_w2c))
+    else: 
+        # Remove the estimated R|T from R_mat, T_vec
+        # as there's no GT data for this entry.
+        print("No ground truth data for entry ", i, ", deleted from R_mat/T_vec...")
+        del(R_mat[i])
+        del(T_vec[i])
+
+# Recover absolute scale for comparison
+scale = np.linalg.norm(gt_T[0]) # real_length_baseline = 1 * scale
+for i in range(len(T_vec)):
+    T_vec[i] = scale*T_vec[i]
+inlier_pts_3D = scale * inlier_pts_3D
+
+# Draw point cloud
+#ax.scatter3D(inlier_pts_3D[:,0], inlier_pts_3D[:,1], inlier_pts_3D[:,2], c=inlier_pts_3D[:,2],
+#        label='Features Point Cloud')
+
+
+
+# Draw world origin (assuming first frame camera origin as world origin)
+# Notice it is DIFFERENT from ground truth world origin!
+Cam_OXYZ = np.array([[0,0,0],[1,0,0],[0,1,0],[0,0,1]])
+#draw_oxyz(ax, Cam_OXYZ)
+
+# Draw estimation
 for i in range(len(R_mat)):
     Rotation = R_mat[i]
     Translation = T_vec[i]
-    tmp = Rotation.dot(OXYZ.T) + Translation.reshape(3,1)
+    tmp = Rotation.dot(Cam_OXYZ.T) + Translation.reshape(3,1)
     OXYZ1 = tmp.T
     draw_oxyz(ax, OXYZ1)
 
-#ax.set_xlabel('x')
-#ax.set_ylabel('y')
-#ax.set_zlabel('z')
-#ax.set_aspect('equal')
+# Draw ground truth
+for i in range(len(gt_R)):
+    Rotation = gt_R[i]
+    Translation = gt_T[i]
+    tmp = Rotation.dot(Cam_OXYZ.T) + Translation.reshape(3,1)
+    OXYZ1 = tmp.T
+    draw_oxyz(ax, OXYZ1)
+
 plt.show()
+

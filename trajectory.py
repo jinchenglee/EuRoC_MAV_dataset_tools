@@ -95,7 +95,7 @@ T_WL_y = []
 T_WL_z = []
 
 T_WL =[]
-TimeStamp = []
+TS = []
 
 # Load ground truth data of leica0 prism marker
 CSV_READ_N_LINES = fr2
@@ -112,7 +112,7 @@ with open(basedir+'mav0/state_groundtruth_estimate0/data.csv', newline='') as fp
         #print("T_WL (world to leica0) = \n", T_WL)
         
         T_WL.append(RT)
-        TimeStamp.append(timestamp)
+        TS.append(timestamp)
         T_WL_x.append(tx)
         T_WL_y.append(ty)
         T_WL_z.append(tz)
@@ -121,6 +121,13 @@ with open(basedir+'mav0/state_groundtruth_estimate0/data.csv', newline='') as fp
             break
         
 fp.close()
+
+# Convert to array
+TS = np.asarray(TS)
+T_WL = np.asarray(T_WL)
+# Saving into files
+np.save("TS.npy", TS)
+np.save("T_WL.npy", T_WL)
 
 
 # Draw the trajectory 
@@ -142,9 +149,9 @@ ax.view_init(azim=60, elev=50)
 
 OXYZ = np.array([[0,0,0],[1,0,0],[0,1,0],[0,0,1]])
 
-tmp = T_WL[fr1][:,:-1].dot(OXYZ.T) + T_WL[fr1][:,-1].reshape(3,1)
+tmp = T_WL[fr1,:,:-1].dot(OXYZ.T) + T_WL[fr1,:,-1].reshape(3,1)
 OXYZ1 = tmp.T
-tmp = T_WL[fr2][:,:-1].dot(OXYZ.T) + T_WL[fr2][:,-1].reshape(3,1)
+tmp = T_WL[fr2,:,:-1].dot(OXYZ.T) + T_WL[fr2,:,-1].reshape(3,1)
 OXYZ2 = tmp.T
 
 draw_oxyz(ax, OXYZ)
