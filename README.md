@@ -1,5 +1,5 @@
 # Initial view on Monocular Visual Odometry initialization
-![alt text](./sample_vo_trackers_4)
+![KLT init MonoVO](./sample_vo_trackers_4.gif)
 
 # dataset_tools
 Loader for the generic ASL dataset format. The corresponding datasets can be foung here: http://projects.asl.ethz.ch/datasets/doku.php?id=kmavvisualinertialdatasets .
