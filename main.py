@@ -66,9 +66,9 @@ RANSAC_INLIER_RATIO_THRESH = 0.6
 # List of camera data
 frame_img_list = np.sort(glob.glob(basedir+'mav0/cam0/data/*.png'))
 
-START_FRAME = 1321 # A good frame to try normal initialization.
+#START_FRAME = 1321 # A good frame to try normal initialization.
 #START_FRAME = 2679
-#START_FRAME = 3000
+START_FRAME = 3000
 #START_FRAME = 1387 # ~1411 Rotation dominant?
 
 #START_FRAME = 465 # Static scene, expect large ave(Z)
@@ -509,10 +509,14 @@ for i in range(len(T_vec)):
 inlier_pts_3D = scale * inlier_pts_3D
 
 # Draw point cloud
-#ax.scatter3D(inlier_pts_3D[:,0], inlier_pts_3D[:,1], inlier_pts_3D[:,2], c=inlier_pts_3D[:,2],
-#        label='Features Point Cloud')
+ax.scatter3D(inlier_pts_3D[:,0], inlier_pts_3D[:,1], inlier_pts_3D[:,2], c=inlier_pts_3D[:,2],
+        label='Features Point Cloud')
 
 
+# set plot limit
+ax.set_xlim([-10,10])
+ax.set_ylim([-10,10])
+ax.set_zlim([-8,15])
 
 # Draw world origin (assuming first frame camera origin as world origin)
 # Notice it is DIFFERENT from ground truth world origin!
@@ -533,7 +537,7 @@ for i in range(len(gt_R)):
     Translation = gt_T[i]
     tmp = Rotation.dot(Cam_OXYZ.T) + Translation.reshape(3,1)
     OXYZ1 = tmp.T
-    draw_oxyz(ax, OXYZ1)
+    draw_oxyz_gt(ax, OXYZ1)
 
 plt.show()
 

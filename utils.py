@@ -969,6 +969,15 @@ def fun(params, camera_K, n_cameras, n_points, pts_2d_p, pts_2d_c):
     return reprojection(pts_3d, pts_2d_p, pts_2d_c, camera_RTs[0], camera_RTs[1])
 
 
+def draw_oxyz_gt(ax, OXYZ):
+    """
+    Draw coordinate system three axises. Red - OX, Green - OY, Blue - OZ. 
+    Right-hand system.
+    """
+    ax.plot([OXYZ[0,0], OXYZ[1,0]], [OXYZ[0,1], OXYZ[1,1]], [OXYZ[0,2], OXYZ[1,2]],c='c')
+    ax.plot([OXYZ[0,0], OXYZ[2,0]], [OXYZ[0,1], OXYZ[2,1]], [OXYZ[0,2], OXYZ[2,2]],c='m')
+    ax.plot([OXYZ[0,0], OXYZ[3,0]], [OXYZ[0,1], OXYZ[3,1]], [OXYZ[0,2], OXYZ[3,2]],c='y')
+
 def draw_oxyz(ax, OXYZ):
     """
     Draw coordinate system three axises. Red - OX, Green - OY, Blue - OZ. 

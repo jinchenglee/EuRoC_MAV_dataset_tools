@@ -69,12 +69,12 @@ with open(basedir+'mav0/cam0/sensor.yaml') as fp:
 #print(cam0_yaml)\n",
 fp.close()
 
-# T_BS - [R t] from MAV body coordinates to sensor (cam0) coordinates
-T_BS = cam0_yaml['T_BS']['data']
-T_BS_cols = cam0_yaml['T_BS']['cols']
-T_BS_rows = cam0_yaml['T_BS']['rows']
-T_BS = np.array(T_BS).reshape(T_BS_rows, T_BS_cols)
-print("cam0 T_BS (MAV body to camera sensor) = \n", T_BS)
+# T_BC - [R t] from MAV body coordinates to sensor (cam0) coordinates
+T_BC = cam0_yaml['T_BS']['data']
+T_BC_cols = cam0_yaml['T_BS']['cols']
+T_BC_rows = cam0_yaml['T_BS']['rows']
+T_BC = np.array(T_BC).reshape(T_BC_rows, T_BC_cols)
+print("cam0 T_BC (MAV body to camera sensor) = \n", T_BC)
 
 
 # Load leica0 sensor config - position measurement mounted on IMU (ADIS16448)
@@ -125,9 +125,13 @@ fp.close()
 # Convert to array
 TS = np.asarray(TS)
 T_WL = np.asarray(T_WL)
+T_BC = np.asarray(T_BC)
+T_BL = np.asarray(T_BL)
 # Saving into files
 np.save("TS.npy", TS)
 np.save("T_WL.npy", T_WL)
+np.save("T_BL.npy", T_BL)
+np.save("T_BC.npy", T_BC)
 
 
 # Draw the trajectory 
