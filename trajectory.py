@@ -97,6 +97,8 @@ T_WL_z = []
 T_WL =[]
 TS = []
 
+T_WC = []
+
 # Load ground truth data of leica0 prism marker
 CSV_READ_N_LINES = fr2
 with open(basedir+'mav0/state_groundtruth_estimate0/data.csv', newline='') as fp:
@@ -127,12 +129,24 @@ TS = np.asarray(TS)
 T_WL = np.asarray(T_WL)
 T_BC = np.asarray(T_BC)
 T_BL = np.asarray(T_BL)
+
+# Convert from Leica prisma to body(imu0)
+T_LB = np.linalg.inv(T_BL)  # Matrix 4x4
+# Convert from Leica prisma (via body) to camera
+T_LC = T_BC.dot(T_LB)       # Matrix 4x4
+# Finally from world to camera coordinate system
+for i in range(T_WL.shape[0]):
+    tmp_4x4 = np.vstack((T_WL[i], [0,0,0,1]))
+    T_WC_tmp = T_LC.dot(tmp_4x4)
+    T_WC.append(T_WC_tmp[:-1])
+T_WC = np.asarray(T_WC)
+
 # Saving into files
 np.save("TS.npy", TS)
 np.save("T_WL.npy", T_WL)
-np.save("T_BL.npy", T_BL)
-np.save("T_BC.npy", T_BC)
-
+#np.save("T_BL.npy", T_BL)
+#np.save("T_BC.npy", T_BC)
+np.save("T_WC.npy", T_WC)
 
 # Draw the trajectory 
 matplotlib.rcParams['legend.fontsize'] = 10

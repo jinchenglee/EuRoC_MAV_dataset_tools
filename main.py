@@ -47,8 +47,8 @@ T_vec = []
 used_frame_list = []
 
 # Load pre-processed files from MAV dataset
-T_WL = np.load("T_WL.npy")
-TS = np.load("TS.npy").tolist()
+T_WC = np.load("T_WC.npy") # Groud-truth world coordinates to camera world origin (1st frame in VO).
+TS = np.load("TS.npy").tolist() # Timestamp array of ground truth
 
 #-------------
 # Global Parameters
@@ -475,9 +475,9 @@ if timestamp_fr[0] not in TS:
 else:
     idx0 = TS.index(timestamp_fr[0])
     # ground-truth origin to first frame camera origin (new world origin)
-    R_w2c = T_WL[idx0][:,:-1]
+    R_w2c = T_WC[idx0][:,:-1]
     inv_R_w2c = np.linalg.inv(R_w2c)
-    T_w2c = T_WL[idx0][:,-1].reshape(3,1)
+    T_w2c = T_WC[idx0][:,-1].reshape(3,1)
 
 if timestamp_fr[1] not in TS:
     sys.exit("Frame 1 (", str(timestamp_fr[1]), " not in ground-truth")
@@ -488,8 +488,8 @@ gt_T = []
 for i in range(1,len(timestamp_fr)-1,1):
     if timestamp_fr[i] in TS:
         idx = TS.index(timestamp_fr[i])
-        R_w2c_new = T_WL[idx][:,:-1]
-        T_w2c_new = T_WL[idx][:,-1].reshape(3,1)
+        R_w2c_new = T_WC[idx][:,:-1]
+        T_w2c_new = T_WC[idx][:,-1].reshape(3,1)
         # Calculate the ground truth of relative R|T
         # R_new = R_cam2new R_w2c -> R_old2new = R_new * R_w2c^-1
         gt_R.append(R_w2c_new.dot(inv_R_w2c))
