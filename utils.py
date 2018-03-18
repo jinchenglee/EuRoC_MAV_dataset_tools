@@ -968,6 +968,15 @@ def fun(params, camera_K, n_cameras, n_points, pts_2d_p, pts_2d_c):
         camera_RTs[i] = camera_K.dot(camera_RTs[i])
     return reprojection(pts_3d, pts_2d_p, pts_2d_c, camera_RTs[0], camera_RTs[1])
 
+def draw_oxyz_gray(ax, OXYZ):
+    """
+    Draw coordinate system three axises. Cyan - OX, Magenta - OY, Yellow - OZ. 
+    Right-hand system.
+    OXYZ is 4x3 matrix: 4 points, in non-homogeneous coordinats
+    """
+    ax.plot([OXYZ[0,0], OXYZ[1,0]], [OXYZ[0,1], OXYZ[1,1]], [OXYZ[0,2], OXYZ[1,2]],c='grey')
+    ax.plot([OXYZ[0,0], OXYZ[2,0]], [OXYZ[0,1], OXYZ[2,1]], [OXYZ[0,2], OXYZ[2,2]],c='grey')
+    ax.plot([OXYZ[0,0], OXYZ[3,0]], [OXYZ[0,1], OXYZ[3,1]], [OXYZ[0,2], OXYZ[3,2]],c='grey')
 
 def draw_oxyz_gt(ax, OXYZ):
     """

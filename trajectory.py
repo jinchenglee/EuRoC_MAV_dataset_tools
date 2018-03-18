@@ -25,9 +25,65 @@ fr1 = 28600
 fr2 = 30000
 
 def draw_oxyz(ax, OXYZ):
+    """
+    Draw coordinate system three axises. Red - OX, Green - OY, Blue - OZ. 
+    Right-hand system.
+    OXYZ is 4x3 matrix: 4 points, in non-homogeneous coordinats
+    """
     ax.plot([OXYZ[0,0], OXYZ[1,0]], [OXYZ[0,1], OXYZ[1,1]], [OXYZ[0,2], OXYZ[1,2]],c='r')
     ax.plot([OXYZ[0,0], OXYZ[2,0]], [OXYZ[0,1], OXYZ[2,1]], [OXYZ[0,2], OXYZ[2,2]],c='g')
     ax.plot([OXYZ[0,0], OXYZ[3,0]], [OXYZ[0,1], OXYZ[3,1]], [OXYZ[0,2], OXYZ[3,2]],c='b')
+
+
+def draw_oxyz_gt(ax, OXYZ):
+    """
+    Draw coordinate system three axises. Cyan - OX, Magenta - OY, Yellow - OZ. 
+    Right-hand system.
+    OXYZ is 4x3 matrix: 4 points, in non-homogeneous coordinats
+    """
+    ax.plot([OXYZ[0,0], OXYZ[1,0]], [OXYZ[0,1], OXYZ[1,1]], [OXYZ[0,2], OXYZ[1,2]],c='c')
+    ax.plot([OXYZ[0,0], OXYZ[2,0]], [OXYZ[0,1], OXYZ[2,1]], [OXYZ[0,2], OXYZ[2,2]],c='m')
+    ax.plot([OXYZ[0,0], OXYZ[3,0]], [OXYZ[0,1], OXYZ[3,1]], [OXYZ[0,2], OXYZ[3,2]],c='y')
+
+def draw_oxyz_gray(ax, OXYZ):
+    """
+    Draw coordinate system three axises. Cyan - OX, Magenta - OY, Yellow - OZ. 
+    Right-hand system.
+    OXYZ is 4x3 matrix: 4 points, in non-homogeneous coordinats
+    """
+    ax.plot([OXYZ[0,0], OXYZ[1,0]], [OXYZ[0,1], OXYZ[1,1]], [OXYZ[0,2], OXYZ[1,2]],c='grey')
+    ax.plot([OXYZ[0,0], OXYZ[2,0]], [OXYZ[0,1], OXYZ[2,1]], [OXYZ[0,2], OXYZ[2,2]],c='grey')
+    ax.plot([OXYZ[0,0], OXYZ[3,0]], [OXYZ[0,1], OXYZ[3,1]], [OXYZ[0,2], OXYZ[3,2]],c='grey')
+
+def draw_oxyz_RT(RT):
+    """ 
+    RT is 3x4 matrix in shape
+    |R T|
+    """
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('z')
+    ax.set_aspect('equal')
+    # Top-down view?
+    #ax.view_init(azim=270, elev=90)
+    ax.view_init(azim=60, elev=50)
+
+    OXYZ = np.array([[0,0,0],[1,0,0],[0,1,0],[0,0,1]])
+
+    # Draw origin
+    draw_oxyz(ax, OXYZ)
+
+    # RT*origin
+    tmp = RT[:,:-1].dot(OXYZ.T) + RT[:,-1].reshape(3,1)
+    tmp = tmp.T # Transpose to be 4 points x3 matrix
+
+    # Draw rotate-n-translated points
+    draw_oxyz_gt(ax, tmp)
+
+    plt.show()
 
 
 def q2R(w, x, y, z):
