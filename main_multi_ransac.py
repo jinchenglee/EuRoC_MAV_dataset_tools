@@ -222,6 +222,11 @@ for ransac_times in range(3):
     inlier_pts_c = pts_c[min_inliers_list]
     
     inlier_pts_3D = triangulate(inlier_pts_c, inlier_pts_p, camera, min_RT)
+    # Sanity check on average depth
+    med_Z = np.median(abs(inlier_pts_3D[:,2]))
+    ave_Z = np.mean(abs(inlier_pts_3D[:,2]))
+    print("Features from Triangulation: median depth(Z):", med_Z, 
+            ", average depth(Z):", ave_Z)
 
 #----------------------
 # Point cloud visualization

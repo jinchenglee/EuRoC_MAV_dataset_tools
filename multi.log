@@ -1,0 +1,190 @@
+camera intrinsics = 
+ [[458.654   0.    367.215]
+ [  0.    457.296 248.375]
+ [  0.      0.      1.   ]]
+cam0 distortion_coeffs = 
+ [-2.83408110e-01  7.39590700e-02  1.93590000e-04  1.76187114e-05
+  0.00000000e+00]
+1st frame  0 : /Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/mav0/cam0/data/1403636579763555584.png
+2nd frame  3 : /Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/mav0/cam0/data/1403636579913555456.png
+
+--------------------------------
+Started RANSAC 8pt algorithm:
+--------------------------------
+All points estimation. Mean reproj error:  1.1458702960668168 inliers/total: 26 / 584 
+
+Mean reproj error:  0.5694412528884433 Inlier/total= 529 / 584
+Mean reproj error:  0.42318657398418624 Inlier/total= 477 / 584
+Mean reproj error:  0.3029622250715221 Inlier/total= 472 / 584
+
+After 8pt algorithm RANSAC pose estimation:
+p'^T F p = 0.6466126589436669
+Fundamental Matrix from normalized 8-point algorithm:
+ [[ 2.38383779e-06 -1.32193124e-04  1.76646860e-01]
+ [ 1.35190295e-04  2.00027745e-07 -5.88070190e-02]
+ [-1.78225097e-01  5.66722772e-02  1.00000000e+00]]
+Estimated pose RT:
+ [[ 0.99996921  0.00253124 -0.00742731 -0.05463776]
+ [-0.00261039  0.9999397  -0.01066688 -0.91714584]
+ [ 0.00739987  0.01068594  0.99991552 -0.39478883]]
+
+Cam:  [[[ 4.58654000e+02  0.00000000e+00  3.67215000e+02  0.00000000e+00]
+  [ 0.00000000e+00  4.57296000e+02  2.48375000e+02  0.00000000e+00]
+  [ 0.00000000e+00  0.00000000e+00  1.00000000e+00  0.00000000e+00]]
+
+ [[ 4.61357222e+02  5.08499977e+00  3.63777411e+02 -1.70032210e+02]
+  [ 6.44219466e-01  4.59922545e+02  2.43476097e+02 -5.17462800e+02]
+  [ 7.39986659e-03  1.06859381e-02  9.99915523e-01 -3.94788832e-01]]]
+Singular JTdotJ met. Nonlinear optimization diverged(?).
+img points:  [[542.          58.        ]
+ [539.14196777  52.19566727]]
+Iter 0  nonlinear 3d_point= [ 906.6280363  -988.21839864 2374.16293849] , linear 3d_point= [ 906.6280363  -988.21839864 2374.16293849] , reproj_error= [0.36374618 0.36531043]
+Singular JTdotJ met. Nonlinear optimization diverged(?).
+img points:  [[494.          59.        ]
+ [491.24313354  52.6301651 ]]
+Iter 0  nonlinear 3d_point= [ 188.85162624 -282.00875085  681.05246593] , linear 3d_point= [ 188.85162624 -282.00875085  681.05246593] , reproj_error= [0.39735782 0.39922715]
+Singular JTdotJ met. Nonlinear optimization diverged(?).
+img points:  [[490.          59.        ]
+ [487.24264526  52.61198044]]
+Iter 0  nonlinear 3d_point= [ 179.57932898 -276.86855269  668.63475118] , linear 3d_point= [ 179.57932898 -276.86855269  668.63475118] , reproj_error= [0.39890517 0.40078857]
+Singular JTdotJ met. Nonlinear optimization diverged(?).
+img points:  [[526.          40.        ]
+ [523.27801514  33.96498108]]
+Iter 0  nonlinear 3d_point= [ 576.79887868 -757.11611428 1661.78739179] , linear 3d_point= [ 576.79887868 -757.11611428 1661.78739179] , reproj_error= [0.41277144 0.41472858]
+Singular JTdotJ met. Nonlinear optimization diverged(?).
+img points:  [[554.          57.        ]
+ [551.01727295  51.2794075 ]]
+Iter 0  nonlinear 3d_point= [ 1646.93689241 -1689.35626808  4037.38001973] , linear 3d_point= [ 1646.93689241 -1689.35626808  4037.38001973] , reproj_error= [0.31151131 0.31285608]
+Singular JTdotJ met. Nonlinear optimization diverged(?).
+img points:  [[491.          62.        ]
+ [488.23699951  55.65460205]]
+Iter 0  nonlinear 3d_point= [ 185.75353874 -279.58612994  686.06796592] , linear 3d_point= [ 185.75353874 -279.58612994  686.06796592] , reproj_error= [0.39640184 0.39823968]
+Singular JTdotJ met. Nonlinear optimization diverged(?).
+img points:  [[551.          50.        ]
+ [548.08276367  44.10160828]]
+Iter 0  nonlinear 3d_point= [ 782.47973515 -845.4652663  1949.26947727] , linear 3d_point= [ 782.47973515 -845.4652663  1949.26947727] , reproj_error= [0.3301898  0.33169456]
+Singular JTdotJ met. Nonlinear optimization diverged(?).
+img points:  [[561.         219.        ]
+ [556.52398682 213.02178955]]
+Iter 0  nonlinear 3d_point= [298.91399334 -45.57139323 708.59588383] , linear 3d_point= [298.91399334 -45.57139323 708.59588383] , reproj_error= [0.30841968 0.30908742]
+Singular JTdotJ met. Nonlinear optimization diverged(?).
+img points:  [[563.         214.        ]
+ [558.52728271 208.05552673]]
+Iter 0  nonlinear 3d_point= [319.21140861 -56.35597626 748.95613512] , linear 3d_point= [319.21140861 -56.35597626 748.95613512] , reproj_error= [0.30478754 0.30547202]
+Singular JTdotJ met. Nonlinear optimization diverged(?).
+img points:  [[560.         213.        ]
+ [555.54852295 206.9811554 ]]
+Iter 0  nonlinear 3d_point= [275.34017973 -50.80270091 656.09859404] , linear 3d_point= [275.34017973 -50.80270091 656.09859404] , reproj_error= [0.30687585 0.30758914]
+Singular JTdotJ met. Nonlinear optimization diverged(?).
+img points:  [[561.         207.        ]
+ [556.55419922 201.06144714]]
+Iter 0  nonlinear 3d_point= [313.53288116 -67.3004771  743.2300245 ] , linear 3d_point= [313.53288116 -67.3004771  743.2300245 ] , reproj_error= [0.3028988  0.30361913]
+Singular JTdotJ met. Nonlinear optimization diverged(?).
+img points:  [[662.         318.        ]
+ [654.18865967 311.13742065]]
+Iter 0  nonlinear 3d_point= [1272.9172954   301.6393981  1989.99234636] , linear 3d_point= [1272.9172954   301.6393981  1989.99234636] , reproj_error= [1.4362739  1.44062951]
+Features from Triangulation: median depth(Z): 14.627827670632321 , average depth(Z): 339.3841023553784
+
+--------------------------------
+Started RANSAC 8pt algorithm:
+--------------------------------
+All points estimation. Mean reproj error:  1.1458702960668168 inliers/total: 26 / 584 
+
+Mean reproj error:  0.24149427235114188 Inlier/total= 400 / 584
+Mean reproj error:  0.2396458105866993 Inlier/total= 532 / 584
+
+After 8pt algorithm RANSAC pose estimation:
+p'^T F p = 0.47999197669538773
+Fundamental Matrix from normalized 8-point algorithm:
+ [[ 2.65647279e-06 -1.03233695e-04  1.52315370e-01]
+ [ 1.05998141e-04 -3.76629133e-07 -4.06112159e-02]
+ [-1.54830831e-01  3.98116809e-02  1.00000000e+00]]
+Estimated pose RT:
+ [[ 0.99995345 -0.00281702 -0.00922843 -0.01017833]
+ [ 0.0027326   0.99995442 -0.00914773 -0.93467397]
+ [ 0.00925378  0.00912209  0.99991557 -0.35536034]]
+
+Cam:  [[[ 4.58654000e+02  0.00000000e+00  3.67215000e+02  0.00000000e+00]
+  [ 0.00000000e+00  4.57296000e+02  2.48375000e+02  0.00000000e+00]
+  [ 0.00000000e+00  0.00000000e+00  1.00000000e+00  0.00000000e+00]]
+
+ [[ 4.62030777e+02  2.05772734e+00  3.62951339e+02 -1.35161976e+02]
+  [ 3.54801731e+00  4.59540857e+02  2.44170810e+02 -5.15685292e+02]
+  [ 9.25378277e-03  9.12208648e-03  9.99915574e-01 -3.55360338e-01]]]
+Singular JTdotJ met. Nonlinear optimization diverged(?).
+img points:  [[680.        195.       ]
+ [673.7902832 191.0045166]]
+Iter 0  nonlinear 3d_point= [382.9285412  -65.71334463 562.15381045] , linear 3d_point= [382.9285412  -65.71334463 562.15381045] , reproj_error= [0.36758929 0.36875235]
+Singular JTdotJ met. Nonlinear optimization diverged(?).
+img points:  [[681.         188.        ]
+ [674.95281982 183.89717102]]
+Iter 0  nonlinear 3d_point= [322.69556484 -62.41213466 472.16089573] , linear 3d_point= [322.69556484 -62.41213466 472.16089573] , reproj_error= [0.32867837 0.32976713]
+Features from Triangulation: median depth(Z): 18.332729661216995 , average depth(Z): 81.19269566641397
+
+--------------------------------
+Started RANSAC 8pt algorithm:
+--------------------------------
+All points estimation. Mean reproj error:  1.1458702960668168 inliers/total: 26 / 584 
+
+Mean reproj error:  0.3342978116985317 Inlier/total= 439 / 584
+Mean reproj error:  0.2921668565827784 Inlier/total= 461 / 584
+
+After 8pt algorithm RANSAC pose estimation:
+p'^T F p = 0.46508339809554755
+Fundamental Matrix from normalized 8-point algorithm:
+ [[ 2.90666609e-06 -1.19217831e-04  1.57194484e-01]
+ [ 1.23346553e-04 -5.71498957e-07 -4.43220609e-02]
+ [-1.59683101e-01  4.32111086e-02  1.00000000e+00]]
+Estimated pose RT:
+ [[ 0.99993499 -0.00436471 -0.01053362  0.00960473]
+ [ 0.00421425  0.99988938 -0.0142642  -0.91505946]
+ [ 0.01059472  0.01421888  0.99984278 -0.40320459]]
+
+Cam:  [[[ 4.58654000e+02  0.00000000e+00  3.67215000e+02  0.00000000e+00]
+  [ 0.00000000e+00  4.57296000e+02  2.48375000e+02  0.00000000e+00]
+  [ 0.00000000e+00  0.00000000e+00  1.00000000e+00  0.00000000e+00]]
+
+ [[ 4.62514724e+02  3.21949527e+00  3.62325976e+02 -1.43657525e+02]
+  [ 4.55862075e+00  4.60777029e+02  2.41812988e+02 -5.18598969e+02]
+  [ 1.05947171e-02  1.42188809e-02  9.99842775e-01 -4.03204591e-01]]]
+Singular JTdotJ met. Nonlinear optimization diverged(?).
+img points:  [[580.         192.        ]
+ [575.49298096 186.64907837]]
+Iter 0  nonlinear 3d_point= [ 3839.647962   -1017.38781579  8262.54468752] , linear 3d_point= [ 3839.647962   -1017.38781579  8262.54468752] , reproj_error= [0.3602111  0.36095959]
+Singular JTdotJ met. Nonlinear optimization diverged(?).
+img points:  [[562.         195.        ]
+ [557.57489014 189.34735107]]
+Iter 0  nonlinear 3d_point= [ 812.91495578 -222.80402285 1910.93450522] , linear 3d_point= [ 812.91495578 -222.80402285 1910.93450522] , reproj_error= [0.3321427 0.3328437]
+Singular JTdotJ met. Nonlinear optimization diverged(?).
+img points:  [[561.         219.        ]
+ [556.52398682 213.02178955]]
+Iter 0  nonlinear 3d_point= [340.47081832 -51.53697425 804.2039973 ] , linear 3d_point= [340.47081832 -51.53697425 804.2039973 ] , reproj_error= [0.3985712  0.39923447]
+Singular JTdotJ met. Nonlinear optimization diverged(?).
+img points:  [[572.         205.        ]
+ [567.52215576 199.35421753]]
+Iter 0  nonlinear 3d_point= [ 667.20909587 -141.24386969 1491.54511204] , linear 3d_point= [ 667.20909587 -141.24386969 1491.54511204] , reproj_error= [0.39000104 0.39073107]
+Singular JTdotJ met. Nonlinear optimization diverged(?).
+img points:  [[562.         203.        ]
+ [557.57366943 197.19937134]]
+Iter 0  nonlinear 3d_point= [ 490.65521268 -114.27287556 1153.23480403] , linear 3d_point= [ 490.65521268 -114.27287556 1153.23480403] , reproj_error= [0.35929395 0.36001174]
+Singular JTdotJ met. Nonlinear optimization diverged(?).
+img points:  [[563.         214.        ]
+ [558.52728271 208.05552673]]
+Iter 0  nonlinear 3d_point= [356.81630383 -62.59071959 834.28390606] , linear 3d_point= [356.81630383 -62.59071959 834.28390606] , reproj_error= [0.38343592 0.38413016]
+Singular JTdotJ met. Nonlinear optimization diverged(?).
+img points:  [[560.         213.        ]
+ [555.54852295 206.9811554 ]]
+Iter 0  nonlinear 3d_point= [317.96196199 -58.30025145 755.02423116] , linear 3d_point= [317.96196199 -58.30025145 755.02423116] , reproj_error= [0.37269308 0.37339665]
+Singular JTdotJ met. Nonlinear optimization diverged(?).
+img points:  [[565.         203.        ]
+ [560.5524292  197.23196411]]
+Iter 0  nonlinear 3d_point= [ 517.36384886 -118.66498275 1197.59101812] , linear 3d_point= [ 517.36384886 -118.66498275 1197.59101812] , reproj_error= [0.36083775 0.36155862]
+Singular JTdotJ met. Nonlinear optimization diverged(?).
+img points:  [[561.         207.        ]
+ [556.55419922 201.06144714]]
+Iter 0  nonlinear 3d_point= [366.24554776 -78.172359   865.27632219] , linear 3d_point= [366.24554776 -78.172359   865.27632219] , reproj_error= [0.35480623 0.35551926]
+Singular JTdotJ met. Nonlinear optimization diverged(?).
+img points:  [[547.         222.        ]
+ [542.56994629 215.55654907]]
+Iter 0  nonlinear 3d_point= [187.70673301 -27.50529932 477.93526415] , linear 3d_point= [187.70673301 -27.50529932 477.93526415] , reproj_error= [0.35381386 0.35449282]
+Features from Triangulation: median depth(Z): 14.143587804957068 , average depth(Z): 92.87652987052059
