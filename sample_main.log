@@ -1,0 +1,428 @@
+
+-------------------
+VO init (2D-2D) with STEP =  1
+-------------------
+camera intrinsics = 
+ [[458.654   0.    367.215]
+ [  0.    457.296 248.375]
+ [  0.      0.      1.   ]]
+cam0 distortion_coeffs = 
+ [-2.83408110e-01  7.39590700e-02  1.93590000e-04  1.76187114e-05
+  0.00000000e+00]
+1st frame  3000 : /Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/mav0/cam0/data/1403636729763555584.png
+2nd frame  3001 : /Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/mav0/cam0/data/1403636729813555456.png
+OpticalFlow: total  600  features, successfully tracked  600
+
+	--------------------------------
+	Started RANSAC 8pt algorithm:
+	--------------------------------
+All points estimation. Mean reproj error:  0.09739544477048198 inliers/total: 600 / 600 
+
+Mean reproj error:  0.0784467512871002 Inlier/total= 597 / 600
+Mean reproj error:  0.04135105338670048 Inlier/total= 598 / 600
+Mean reproj error:  0.0405305750357863 Inlier/total= 598 / 600
+
+After 8pt algorithm RANSAC pose estimation:
+p'^T F p = 0.38267275931718814
+Fundamental Matrix from normalized 8-point algorithm:
+ [[-1.77374242e-06  1.40095633e-03 -3.02891412e-01]
+ [-1.40016466e-03  3.57655347e-07  7.63234041e-01]
+ [ 3.01966333e-01 -7.63598119e-01  1.00000000e+00]]
+Estimated pose RT:
+ [[ 9.99999178e-01  1.24261129e-03 -3.14510275e-04  3.60585895e-01]
+ [-1.24376784e-03  9.99992366e-01 -3.70421938e-03 -6.79445796e-02]
+ [ 3.09904969e-04  3.70460751e-03  9.99993090e-01  9.30248002e-01]]
+
+Cam:  [[[ 4.58654000e+02  0.00000000e+00  3.67215000e+02  0.00000000e+00]
+  [ 0.00000000e+00  4.57296000e+02  2.48375000e+02  0.00000000e+00]
+  [ 0.00000000e+00  0.00000000e+00  1.00000000e+00  0.00000000e+00]]
+
+ [[ 4.58767425e+02  1.93031609e+00  3.67068211e+02  5.06985184e+02]
+  [-4.91797412e-01  4.58212641e+02  2.46679359e+02  1.99979563e+02]
+  [ 3.09904969e-04  3.70460751e-03  9.99993090e-01  9.30248002e-01]]]
+Features from Triangulation: median depth(Z): 167.0996249009751 , average depth(Z): 225.87862109642776
+Feature average depth(Z) from Triangulation too big, it is: 225.87862109642776  threshold =  70
+
+-------------------
+VO init (2D-2D) with STEP =  2
+-------------------
+camera intrinsics = 
+ [[458.654   0.    367.215]
+ [  0.    457.296 248.375]
+ [  0.      0.      1.   ]]
+cam0 distortion_coeffs = 
+ [-2.83408110e-01  7.39590700e-02  1.93590000e-04  1.76187114e-05
+  0.00000000e+00]
+1st frame  3000 : /Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/mav0/cam0/data/1403636729763555584.png
+2nd frame  3002 : /Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/mav0/cam0/data/1403636729863555584.png
+OpticalFlow: total  600  features, successfully tracked  600
+
+	--------------------------------
+	Started RANSAC 8pt algorithm:
+	--------------------------------
+All points estimation. Mean reproj error:  0.18362205968428008 inliers/total: 600 / 600 
+
+Mean reproj error:  0.15477283087515736 Inlier/total= 591 / 600
+Mean reproj error:  0.14518161632354165 Inlier/total= 591 / 600
+Mean reproj error:  0.09075062354381627 Inlier/total= 600 / 600
+Mean reproj error:  0.08773404679871243 Inlier/total= 600 / 600
+Mean reproj error:  0.08546708205191732 Inlier/total= 600 / 600
+Mean reproj error:  0.0803627902572954 Inlier/total= 600 / 600
+
+After 8pt algorithm RANSAC pose estimation:
+p'^T F p = 0.20020483808027834
+Fundamental Matrix from normalized 8-point algorithm:
+ [[-1.42465699e-07  4.03123210e-04 -8.24980304e-02]
+ [-4.02169968e-04  1.85146379e-06  2.27916527e-01]
+ [ 8.08698713e-02 -2.28982637e-01  1.00000000e+00]]
+Estimated pose RT:
+ [[ 9.99999084e-01 -8.88525380e-05 -1.35088054e-03  3.97716042e-01]
+ [ 7.71248394e-05  9.99962333e-01 -8.67909638e-03 -9.47773002e-02]
+ [ 1.35160082e-03  8.67898424e-03  9.99961423e-01  9.12600248e-01]]
+
+Cam:  [[[4.58654000e+02 0.00000000e+00 3.67215000e+02 0.00000000e+00]
+  [0.00000000e+00 4.57296000e+02 2.48375000e+02 0.00000000e+00]
+  [0.00000000e+00 0.00000000e+00 1.00000000e+00 0.00000000e+00]]
+
+ [[4.59149908e+02 3.14630063e+00 3.66581247e+02 5.17534554e+02]
+  [3.70972734e-01 4.59434418e+02 2.44396502e+02 1.83325806e+02]
+  [1.35160082e-03 8.67898424e-03 9.99961423e-01 9.12600248e-01]]]
+Features from Triangulation: median depth(Z): 85.9970986486814 , average depth(Z): 106.70998490241772
+Feature average depth(Z) from Triangulation too big, it is: 106.70998490241772  threshold =  70
+
+-------------------
+VO init (2D-2D) with STEP =  3
+-------------------
+camera intrinsics = 
+ [[458.654   0.    367.215]
+ [  0.    457.296 248.375]
+ [  0.      0.      1.   ]]
+cam0 distortion_coeffs = 
+ [-2.83408110e-01  7.39590700e-02  1.93590000e-04  1.76187114e-05
+  0.00000000e+00]
+1st frame  3000 : /Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/mav0/cam0/data/1403636729763555584.png
+2nd frame  3003 : /Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/mav0/cam0/data/1403636729913555456.png
+OpticalFlow: total  600  features, successfully tracked  594
+
+	--------------------------------
+	Started RANSAC 8pt algorithm:
+	--------------------------------
+All points estimation. Mean reproj error:  0.5846618765724637 inliers/total: 577 / 594 
+
+Mean reproj error:  0.31138316696752766 Inlier/total= 559 / 594
+Mean reproj error:  0.14316997855362876 Inlier/total= 588 / 594
+Mean reproj error:  0.11316392111111861 Inlier/total= 588 / 594
+Mean reproj error:  0.10971742281116849 Inlier/total= 587 / 594
+
+After 8pt algorithm RANSAC pose estimation:
+p'^T F p = 0.5112922620017031
+Fundamental Matrix from normalized 8-point algorithm:
+ [[-2.86090022e-06  4.82876400e-04 -1.00873882e-01]
+ [-4.82138268e-04  1.13107009e-06  2.60810424e-01]
+ [ 1.00656790e-01 -2.61656272e-01  1.00000000e+00]]
+Estimated pose RT:
+ [[ 9.99990659e-01  4.31904528e-03 -1.65685265e-04  3.53660855e-01]
+ [-4.32078941e-03  9.99911359e-01 -1.25938331e-02 -8.71961050e-02]
+ [ 1.11277243e-04  1.25944314e-02  9.99920681e-01  9.31300617e-01]]
+
+Cam:  [[[ 4.58654000e+02  0.00000000e+00  3.67215000e+02  0.00000000e+00]
+  [ 0.00000000e+00  4.57296000e+02  2.48375000e+02  0.00000000e+00]
+  [ 0.00000000e+00  0.00000000e+00  1.00000000e+00  0.00000000e+00]]
+
+ [[ 4.58690578e+02  6.60581151e+00  3.67109881e+02  5.04195522e+02]
+  [-1.94824123e+00  4.60383607e+02  2.42596190e+02  1.91437361e+02]
+  [ 1.11277243e-04  1.25944314e-02  9.99920681e-01  9.31300617e-01]]]
+Features from Triangulation: median depth(Z): 59.500246690383456 , average depth(Z): 70.75986760947765
+Feature average depth(Z) from Triangulation too big, it is: 70.75986760947765  threshold =  70
+
+-------------------
+VO init (2D-2D) with STEP =  4
+-------------------
+camera intrinsics = 
+ [[458.654   0.    367.215]
+ [  0.    457.296 248.375]
+ [  0.      0.      1.   ]]
+cam0 distortion_coeffs = 
+ [-2.83408110e-01  7.39590700e-02  1.93590000e-04  1.76187114e-05
+  0.00000000e+00]
+1st frame  3000 : /Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/mav0/cam0/data/1403636729763555584.png
+2nd frame  3004 : /Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/mav0/cam0/data/1403636729963555584.png
+OpticalFlow: total  600  features, successfully tracked  594
+
+	--------------------------------
+	Started RANSAC 8pt algorithm:
+	--------------------------------
+All points estimation. Mean reproj error:  0.7693726905388907 inliers/total: 562 / 594 
+
+Mean reproj error:  0.696416279526308 Inlier/total= 543 / 594
+Mean reproj error:  0.41609540588758287 Inlier/total= 564 / 594
+Mean reproj error:  0.21346856498349986 Inlier/total= 586 / 594
+Mean reproj error:  0.17747886728058848 Inlier/total= 585 / 594
+Mean reproj error:  0.14195040618225918 Inlier/total= 584 / 594
+
+After 8pt algorithm RANSAC pose estimation:
+p'^T F p = 0.3035766012971628
+Fundamental Matrix from normalized 8-point algorithm:
+ [[-3.50365163e-07  2.17058248e-04 -4.52032937e-02]
+ [-2.16450350e-04  1.59734384e-06  1.29034041e-01]
+ [ 4.37882085e-02 -1.29870520e-01  1.00000000e+00]]
+Estimated pose RT:
+ [[ 0.99999704  0.00139895 -0.00199311  0.44579555]
+ [-0.0014316   0.99986326 -0.01647459 -0.09159462]
+ [ 0.00196979  0.0164774   0.9998623   0.89043627]]
+
+Cam:  [[[ 4.58654000e+02  0.00000000e+00  3.67215000e+02  0.00000000e+00]
+  [ 0.00000000e+00  4.57296000e+02  2.48375000e+02  0.00000000e+00]
+  [ 0.00000000e+00  0.00000000e+00  1.00000000e+00  0.00000000e+00]]
+
+ [[ 4.59375977e+02  6.69238080e+00  3.66250286e+02  5.31447467e+02]
+  [-1.65416442e-01  4.61326043e+02  2.40807032e+02  1.79276256e+02]
+  [ 1.96979002e-03  1.64773990e-02  9.99862298e-01  8.90436272e-01]]]
+Features from Triangulation: median depth(Z): 44.91017625071159 , average depth(Z): 55.565036621324026
+   Iteration     Total nfev        Cost      Cost reduction    Step norm     Optimality   
+       0              1         3.1451e+01                                    1.30e+04    
+       1             21         3.0585e+01      8.66e-01       7.94e-05       1.30e+04    
+       2             22         3.0585e+01      2.38e-07       7.85e-09       1.30e+04    
+Both `ftol` and `xtol` termination conditions are satisfied.
+Function evaluations 22, initial cost 3.1451e+01, final cost 3.0585e+01, first-order optimality 1.30e+04.
+pts_p:
+ [[174.0053677  127.9720115    1.        ]
+ [167.95353969 117.21711196   1.        ]
+ [123.96053471 104.17799108   1.        ]] 
+ [[174. 128.   1.]
+ [168. 117.   1.]
+ [124. 104.   1.]]
+pts_c:
+ [[186.01072488 122.75132131   1.        ]
+ [180.92193028 112.44225581   1.        ]
+ [139.33646075 100.0383176    1.        ]] 
+ [[186.01591 122.7242    1.     ]
+ [180.87714 112.65232   1.     ]
+ [139.29848 100.21015   1.     ]]
+
+--------------------------------
+Start 2D-3D PnP procedure:
+--------------------------------
+
+next frame  3005 : /Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/mav0/cam0/data/1403636730013555456.png
+OpticalFlow: total  584  features, successfully tracked  583
+
+	--------------------------------
+	Started 2D-3D PnP algorithm:
+	--------------------------------
+RANSAC_PnP(): init with all points. Mean reproj error:  1.1053991750081287 Inlier/total= 510 / 583
+RANSAC_PnP(): Mean reproj error:  0.30149436732927815 Inlier/total= 582 / 583
+RANSAC_PnP(): Mean reproj error:  0.2277995433133139 Inlier/total= 582 / 583
+RANSAC_PnP(): Mean reproj error:  0.20336750340055368 Inlier/total= 582 / 583
+RANSAC_PnP(): Mean reproj error:  0.20302250110633713 Inlier/total= 582 / 583
+RANSAC_PnP(): Mean reproj error:  0.1897229001557534 Inlier/total= 582 / 583
+RANSAC_PnP(): Mean reproj error:  0.1811546923586616 Inlier/total= 582 / 583
+RANSAC_PnP(): Mean reproj error:  0.16157156418435592 Inlier/total= 582 / 583
+2D-3D PnP estimated: reproj_err= 0.16157156418435592 
+R= [[ 0.99999447  0.00304125 -0.00134453]
+ [-0.00306684  0.9998059  -0.01946176]
+ [ 0.00128508  0.01946578  0.9998097 ]] 
+T= [ 0.52866137 -0.1458297   1.11028436]
+
+next frame  3006 : /Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/mav0/cam0/data/1403636730063555584.png
+OpticalFlow: total  582  features, successfully tracked  582
+
+	--------------------------------
+	Started 2D-3D PnP algorithm:
+	--------------------------------
+RANSAC_PnP(): init with all points. Mean reproj error:  0.34643405502478225 Inlier/total= 582 / 582
+RANSAC_PnP(): Mean reproj error:  0.3419771180300155 Inlier/total= 582 / 582
+RANSAC_PnP(): Mean reproj error:  0.3328090571348182 Inlier/total= 582 / 582
+RANSAC_PnP(): Mean reproj error:  0.26673864320145807 Inlier/total= 582 / 582
+RANSAC_PnP(): Mean reproj error:  0.1966993471247322 Inlier/total= 582 / 582
+2D-3D PnP estimated: reproj_err= 0.1966993471247322 
+R= [[ 0.99999297  0.0035843  -0.00109696]
+ [-0.00360646  0.99977482 -0.02091155]
+ [ 0.00102176  0.02091536  0.99978073]] 
+T= [ 0.64689123 -0.19858484  1.32956303]
+
+next frame  3007 : /Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/mav0/cam0/data/1403636730113555456.png
+OpticalFlow: total  582  features, successfully tracked  582
+
+	--------------------------------
+	Started 2D-3D PnP algorithm:
+	--------------------------------
+RANSAC_PnP(): init with all points. Mean reproj error:  0.4613842405742939 Inlier/total= 582 / 582
+RANSAC_PnP(): Mean reproj error:  0.3796048839417115 Inlier/total= 577 / 582
+RANSAC_PnP(): Mean reproj error:  0.3752338004214439 Inlier/total= 576 / 582
+RANSAC_PnP(): Mean reproj error:  0.29781976569994867 Inlier/total= 582 / 582
+2D-3D PnP estimated: reproj_err= 0.29781976569994867 
+R= [[ 0.99999341  0.00342043  0.00121966]
+ [-0.00339155  0.99973106 -0.0229412 ]
+ [-0.0012978   0.02293692  0.99973607]] 
+T= [ 0.6835657  -0.23381831  1.61230773]
+
+next frame  3008 : /Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/mav0/cam0/data/1403636730163555584.png
+OpticalFlow: total  582  features, successfully tracked  582
+
+	--------------------------------
+	Started 2D-3D PnP algorithm:
+	--------------------------------
+RANSAC_PnP(): init with all points. Mean reproj error:  0.5903012991166069 Inlier/total= 579 / 582
+RANSAC_PnP(): Mean reproj error:  0.47454479833572183 Inlier/total= 577 / 582
+RANSAC_PnP(): Mean reproj error:  0.468475614473768 Inlier/total= 576 / 582
+RANSAC_PnP(): Mean reproj error:  0.449001180481386 Inlier/total= 576 / 582
+RANSAC_PnP(): Mean reproj error:  0.42079314223968955 Inlier/total= 576 / 582
+RANSAC_PnP(): Mean reproj error:  0.40479572527468244 Inlier/total= 576 / 582
+RANSAC_PnP(): Mean reproj error:  0.3902422192327956 Inlier/total= 576 / 582
+RANSAC_PnP(): Mean reproj error:  0.3756963092725614 Inlier/total= 579 / 582
+2D-3D PnP estimated: reproj_err= 0.3756963092725614 
+R= [[ 9.99983126e-01  5.76806664e-03  6.90338866e-04]
+ [-5.75171460e-03  9.99747580e-01 -2.17184972e-02]
+ [-8.15438351e-04  2.17141601e-02  9.99763887e-01]] 
+T= [ 0.82009903 -0.3422525   1.82454704]
+
+next frame  3009 : /Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/mav0/cam0/data/1403636730213555456.png
+OpticalFlow: total  579  features, successfully tracked  579
+
+	--------------------------------
+	Started 2D-3D PnP algorithm:
+	--------------------------------
+RANSAC_PnP(): init with all points. Mean reproj error:  0.6881631367459513 Inlier/total= 577 / 579
+RANSAC_PnP(): Mean reproj error:  0.4449711642612803 Inlier/total= 576 / 579
+RANSAC_PnP(): Mean reproj error:  0.42694835111145824 Inlier/total= 576 / 579
+2D-3D PnP estimated: reproj_err= 0.42694835111145824 
+R= [[ 9.99997655e-01  2.11740034e-03  4.55203829e-04]
+ [-2.10589226e-03  9.99710995e-01 -2.39476912e-02]
+ [-5.05779123e-04  2.39466764e-02  9.99713109e-01]] 
+T= [ 0.9596487  -0.43623181  2.00430764]
+
+next frame  3010 : /Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/mav0/cam0/data/1403636730263555584.png
+OpticalFlow: total  576  features, successfully tracked  576
+
+	--------------------------------
+	Started 2D-3D PnP algorithm:
+	--------------------------------
+RANSAC_PnP(): init with all points. Mean reproj error:  0.8174889846739076 Inlier/total= 572 / 576
+RANSAC_PnP(): Mean reproj error:  0.77925715028845 Inlier/total= 566 / 576
+RANSAC_PnP(): Mean reproj error:  0.5309749131213813 Inlier/total= 574 / 576
+RANSAC_PnP(): Mean reproj error:  0.521589850442233 Inlier/total= 575 / 576
+RANSAC_PnP(): Mean reproj error:  0.473943616491866 Inlier/total= 576 / 576
+2D-3D PnP estimated: reproj_err= 0.473943616491866 
+R= [[ 0.99999441  0.00249763  0.00222381]
+ [-0.00244201  0.99969271 -0.02466832]
+ [-0.00228474  0.02466275  0.99969322]] 
+T= [ 1.03136965 -0.50768751  2.13540792]
+
+next frame  3011 : /Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/mav0/cam0/data/1403636730313555456.png
+OpticalFlow: total  576  features, successfully tracked  576
+
+	--------------------------------
+	Started 2D-3D PnP algorithm:
+	--------------------------------
+RANSAC_PnP(): init with all points. Mean reproj error:  0.9991109376713447 Inlier/total= 563 / 576
+RANSAC_PnP(): Mean reproj error:  0.8755749021713928 Inlier/total= 532 / 576
+RANSAC_PnP(): Mean reproj error:  0.48204314519388886 Inlier/total= 574 / 576
+RANSAC_PnP(): Mean reproj error:  0.4369559646528699 Inlier/total= 572 / 576
+2D-3D PnP estimated: reproj_err= 0.4369559646528699 
+R= [[ 0.99998616  0.00478127  0.0021941 ]
+ [-0.00472413  0.99966752 -0.02534805]
+ [-0.00231456  0.02533733  0.99967628]] 
+T= [ 1.17010221 -0.52787665  2.35232636]
+
+next frame  3012 : /Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/mav0/cam0/data/1403636730363555584.png
+OpticalFlow: total  572  features, successfully tracked  572
+
+	--------------------------------
+	Started 2D-3D PnP algorithm:
+	--------------------------------
+RANSAC_PnP(): init with all points. Mean reproj error:  1.0902841302273714 Inlier/total= 531 / 572
+RANSAC_PnP(): Mean reproj error:  0.881597172627384 Inlier/total= 561 / 572
+RANSAC_PnP(): Mean reproj error:  0.6874222240749135 Inlier/total= 566 / 572
+RANSAC_PnP(): Mean reproj error:  0.5568241735710945 Inlier/total= 567 / 572
+2D-3D PnP estimated: reproj_err= 0.5568241735710945 
+R= [[ 0.9999693   0.00673978  0.00399695]
+ [-0.00664386  0.9997007  -0.02354503]
+ [-0.00415444  0.02351776  0.99971479]] 
+T= [ 1.23686965 -0.74915343  2.43130326]
+
+next frame  3013 : /Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/mav0/cam0/data/1403636730413555456.png
+OpticalFlow: total  567  features, successfully tracked  567
+
+	--------------------------------
+	Started 2D-3D PnP algorithm:
+	--------------------------------
+RANSAC_PnP(): init with all points. Mean reproj error:  1.0472483981477136 Inlier/total= 474 / 567
+RANSAC_PnP(): Mean reproj error:  0.9766631142997586 Inlier/total= 459 / 567
+RANSAC_PnP(): Mean reproj error:  0.902734211845795 Inlier/total= 533 / 567
+RANSAC_PnP(): Mean reproj error:  0.8092743382519916 Inlier/total= 543 / 567
+RANSAC_PnP(): Mean reproj error:  0.7812838600870146 Inlier/total= 557 / 567
+RANSAC_PnP(): Mean reproj error:  0.6073354217187505 Inlier/total= 553 / 567
+2D-3D PnP estimated: reproj_err= 0.6073354217187505 
+R= [[ 0.99996719  0.00697966  0.00411136]
+ [-0.00686608  0.99961129 -0.02702081]
+ [-0.00429836  0.02699169  0.99962642]] 
+T= [ 1.26681483 -0.82399812  2.74816571]
+
+next frame  3014 : /Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/mav0/cam0/data/1403636730463555584.png
+OpticalFlow: total  553  features, successfully tracked  549
+
+	--------------------------------
+	Started 2D-3D PnP algorithm:
+	--------------------------------
+RANSAC_PnP(): init with all points. Mean reproj error:  0.9695961217431753 Inlier/total= 434 / 549
+RANSAC_PnP(): Mean reproj error:  0.9561884449344467 Inlier/total= 497 / 549
+RANSAC_PnP(): Mean reproj error:  0.9488300380368548 Inlier/total= 521 / 549
+RANSAC_PnP(): Mean reproj error:  0.8242577261381255 Inlier/total= 546 / 549
+RANSAC_PnP(): Mean reproj error:  0.6857213126580417 Inlier/total= 519 / 549
+RANSAC_PnP(): Mean reproj error:  0.621218821906703 Inlier/total= 547 / 549
+2D-3D PnP estimated: reproj_err= 0.621218821906703 
+R= [[ 0.9999789   0.00446139  0.00472131]
+ [-0.00429414  0.999383   -0.03485929]
+ [-0.00487392  0.03483828  0.99938108]] 
+T= [ 1.46554256 -0.81291725  2.90072196]
+
+next frame  3015 : /Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/mav0/cam0/data/1403636730513555456.png
+OpticalFlow: total  547  features, successfully tracked  547
+
+	--------------------------------
+	Started 2D-3D PnP algorithm:
+	--------------------------------
+RANSAC_PnP(): init with all points. Mean reproj error:  0.9026217919580453 Inlier/total= 430 / 547
+RANSAC_PnP(): Mean reproj error:  0.8412920830251341 Inlier/total= 543 / 547
+RANSAC_PnP(): Mean reproj error:  0.712867157492114 Inlier/total= 544 / 547
+2D-3D PnP estimated: reproj_err= 0.712867157492114 
+R= [[ 0.99999543  0.00240858  0.00182702]
+ [-0.00232991  0.99911889 -0.04190489]
+ [-0.00192634  0.04190044  0.99911993]] 
+T= [ 1.6083697  -1.00316333  2.98225508]
+
+next frame  3016 : /Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/mav0/cam0/data/1403636730563555584.png
+OpticalFlow: total  544  features, successfully tracked  541
+
+	--------------------------------
+	Started 2D-3D PnP algorithm:
+	--------------------------------
+RANSAC_PnP(): init with all points. Mean reproj error:  0.9142628449678611 Inlier/total= 406 / 541
+RANSAC_PnP(): Mean reproj error:  0.6897816933999298 Inlier/total= 535 / 541
+2D-3D PnP estimated: reproj_err= 0.6897816933999298 
+R= [[ 0.99997668  0.00218714  0.00646957]
+ [-0.00186759  0.99879733 -0.04899401]
+ [-0.00656894  0.04898079  0.99877812]] 
+T= [ 1.61986341 -1.11167323  3.26973011]
+
+next frame  3017 : /Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/mav0/cam0/data/1403636730613555456.png
+OpticalFlow: total  535  features, successfully tracked  535
+
+	--------------------------------
+	Started 2D-3D PnP algorithm:
+	--------------------------------
+RANSAC_PnP(): init with all points. Mean reproj error:  0.9336186092574789 Inlier/total= 523 / 535
+RANSAC_PnP(): Mean reproj error:  0.9110434485414239 Inlier/total= 378 / 535
+RANSAC_PnP(): Failed!
+
+2D-3D PnP estimated: reproj_err= 0.9110434485414239 
+R= [[ 0.99999749  0.0018066   0.00132326]
+ [-0.00172905  0.99840476 -0.05643533]
+ [-0.0014231   0.0564329   0.99840538]] 
+T= [ 1.88582371 -0.96570641  2.89000515]
+VO failed in 2D-3D PnP! 
+len(timestamp_fr)= 14 len(R_mat)= 13 len(T_vec)= 13
+No ground truth data for entry  4  in R_mat|T_vec, deleted from R_mat/T_vec...
+No ground truth data for entry  8  in R_mat|T_vec, deleted from R_mat/T_vec...
+len(gt_R)= 11 len(gt_T)= 11
