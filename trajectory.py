@@ -200,8 +200,7 @@ T_WC = np.asarray(T_WC)
 # Saving into files
 np.save("TS.npy", TS)
 np.save("T_WL.npy", T_WL)
-#np.save("T_BL.npy", T_BL)
-#np.save("T_BC.npy", T_BC)
+np.save("T_LC.npy", T_LC)
 np.save("T_WC.npy", T_WC)
 
 # Draw the trajectory 

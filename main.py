@@ -66,9 +66,9 @@ RANSAC_INLIER_RATIO_THRESH = 0.6
 # List of camera data
 frame_img_list = np.sort(glob.glob(basedir+'mav0/cam0/data/*.png'))
 
-#START_FRAME = 1321 # A good frame to try normal initialization.
+START_FRAME = 1321 # A good frame to try normal initialization.
 #START_FRAME = 2679
-START_FRAME = 3000
+#START_FRAME = 3000
 #START_FRAME = 1387 # ~1411 Rotation dominant?
 
 #START_FRAME = 465 # Static scene, expect large ave(Z)
@@ -444,20 +444,6 @@ for fr in range(START_FRAME+STEP+1, START_FRAME+STEP+15, 1):
 #----------------------------------
 # Visualization of trajectory
 #----------------------------------
-fig = plt.figure()
-ax = fig.gca(projection='3d')
-
-ax.legend()
-ax.set_xlabel('x')
-ax.set_ylabel('y')
-ax.set_zlabel('z')
-ax.set_aspect('equal')
-# Top-down view?
-#ax.view_init(azim=270, elev=90)
-#
-ax.view_init(azim=60, elev=50)
-#plt.show()
-
 
 
 # Regular expression to extract timestamp number from frame file name
@@ -485,13 +471,13 @@ if timestamp_fr[1] not in TS:
 # Extract ground truth
 gt_R = []
 gt_T = []
-for i in range(1,len(timestamp_fr)-1,1):
+for i in range(1,len(timestamp_fr),1):
     if timestamp_fr[i] in TS:
         idx = TS.index(timestamp_fr[i])
         R_w2c_new = T_WC[idx][:,:-1]
         T_w2c_new = T_WC[idx][:,-1].reshape(3,1)
         # Calculate the ground truth of relative R|T
-        # R_new = R_cam2new R_w2c -> R_old2new = R_new * R_w2c^-1
+        # R_new = R_cam2new R_w2c -> R_cam2new = R_new * R_w2c^-1
         gt_R.append(R_w2c_new.dot(inv_R_w2c))
         # T_old2new = T_new - T_old
         gt_T.append(R_w2c.dot(T_w2c_new-T_w2c))
@@ -508,15 +494,35 @@ for i in range(len(T_vec)):
     T_vec[i] = scale*T_vec[i]
 inlier_pts_3D = scale * inlier_pts_3D
 
+
+
+
+
+
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+
+ax.legend()
+ax.set_xlabel('x')
+ax.set_ylabel('y')
+ax.set_zlabel('z')
+ax.set_aspect('equal')
+# Top-down view?
+#ax.view_init(azim=270, elev=90)
+#
+ax.view_init(azim=60, elev=50)
+#plt.show()
+
+
 # Draw point cloud
 ax.scatter3D(inlier_pts_3D[:,0], inlier_pts_3D[:,1], inlier_pts_3D[:,2], c=inlier_pts_3D[:,2],
         label='Features Point Cloud')
 
 
 # set plot limit
-ax.set_xlim([-10,10])
-ax.set_ylim([-10,10])
-ax.set_zlim([-8,15])
+ax.set_xlim([-5,5])
+ax.set_ylim([-5,5])
+ax.set_zlim([-5,5])
 
 # Draw world origin (assuming first frame camera origin as world origin)
 # Notice it is DIFFERENT from ground truth world origin!
@@ -524,18 +530,20 @@ Cam_OXYZ = np.array([[0,0,0],[1,0,0],[0,1,0],[0,0,1]])
 #draw_oxyz(ax, Cam_OXYZ)
 
 # Draw estimation
+draw_oxyz_gray(ax, Cam_OXYZ) # Origin
 for i in range(len(R_mat)):
-    Rotation = R_mat[i]
+    Rotation = np.linalg.inv(R_mat[i])
     Translation = T_vec[i]
-    tmp = Rotation.dot(Cam_OXYZ.T) + Translation.reshape(3,1)
+    tmp = Rotation.dot((Cam_OXYZ - Translation).T)
     OXYZ1 = tmp.T
     draw_oxyz(ax, OXYZ1)
 
 # Draw ground truth
+draw_oxyz_gray(ax, Cam_OXYZ) # Origin
 for i in range(len(gt_R)):
-    Rotation = gt_R[i]
+    Rotation = np.linalg.inv(gt_R[i])
     Translation = gt_T[i]
-    tmp = Rotation.dot(Cam_OXYZ.T) + Translation.reshape(3,1)
+    tmp = Rotation.dot((Cam_OXYZ - Translation.T).T)
     OXYZ1 = tmp.T
     draw_oxyz_gt(ax, OXYZ1)
 
