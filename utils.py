@@ -1018,11 +1018,16 @@ def draw_oxyz_RT(RT):
     # Draw origin
     draw_oxyz(ax, OXYZ)
 
-    # RT*origin
-    tmp = RT[:,:-1].dot(OXYZ.T) + RT[:,-1].reshape(3,1)
-    tmp = tmp.T # Transpose to be 4 points x3 matrix
+    for i in range(len(RT)):
+        RT_i = RT[i]
+        # RT*origin
+        tmp = RT_i[:,:-1].dot(OXYZ.T) + RT_i[:,-1].reshape(3,1)
+        tmp = tmp.T # Transpose to be 4 points x3 matrix
 
-    # Draw rotate-n-translated points
+        # Draw rotate-n-translated points
+        draw_oxyz_gt(ax, tmp)
+
+    # Draw ending one with rgb color to differentiate
     draw_oxyz_gt(ax, tmp)
 
     plt.show()

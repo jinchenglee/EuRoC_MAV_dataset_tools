@@ -19,71 +19,12 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
 
+from utils import *
+
 #fr1 = 8600
 #fr2 = 10000
 fr1 = 28600
 fr2 = 30000
-
-def draw_oxyz(ax, OXYZ):
-    """
-    Draw coordinate system three axises. Red - OX, Green - OY, Blue - OZ. 
-    Right-hand system.
-    OXYZ is 4x3 matrix: 4 points, in non-homogeneous coordinats
-    """
-    ax.plot([OXYZ[0,0], OXYZ[1,0]], [OXYZ[0,1], OXYZ[1,1]], [OXYZ[0,2], OXYZ[1,2]],c='r')
-    ax.plot([OXYZ[0,0], OXYZ[2,0]], [OXYZ[0,1], OXYZ[2,1]], [OXYZ[0,2], OXYZ[2,2]],c='g')
-    ax.plot([OXYZ[0,0], OXYZ[3,0]], [OXYZ[0,1], OXYZ[3,1]], [OXYZ[0,2], OXYZ[3,2]],c='b')
-
-
-def draw_oxyz_gt(ax, OXYZ):
-    """
-    Draw coordinate system three axises. Cyan - OX, Magenta - OY, Yellow - OZ. 
-    Right-hand system.
-    OXYZ is 4x3 matrix: 4 points, in non-homogeneous coordinats
-    """
-    ax.plot([OXYZ[0,0], OXYZ[1,0]], [OXYZ[0,1], OXYZ[1,1]], [OXYZ[0,2], OXYZ[1,2]],c='c')
-    ax.plot([OXYZ[0,0], OXYZ[2,0]], [OXYZ[0,1], OXYZ[2,1]], [OXYZ[0,2], OXYZ[2,2]],c='m')
-    ax.plot([OXYZ[0,0], OXYZ[3,0]], [OXYZ[0,1], OXYZ[3,1]], [OXYZ[0,2], OXYZ[3,2]],c='y')
-
-def draw_oxyz_gray(ax, OXYZ):
-    """
-    Draw coordinate system three axises. Cyan - OX, Magenta - OY, Yellow - OZ. 
-    Right-hand system.
-    OXYZ is 4x3 matrix: 4 points, in non-homogeneous coordinats
-    """
-    ax.plot([OXYZ[0,0], OXYZ[1,0]], [OXYZ[0,1], OXYZ[1,1]], [OXYZ[0,2], OXYZ[1,2]],c='grey')
-    ax.plot([OXYZ[0,0], OXYZ[2,0]], [OXYZ[0,1], OXYZ[2,1]], [OXYZ[0,2], OXYZ[2,2]],c='grey')
-    ax.plot([OXYZ[0,0], OXYZ[3,0]], [OXYZ[0,1], OXYZ[3,1]], [OXYZ[0,2], OXYZ[3,2]],c='grey')
-
-def draw_oxyz_RT(RT):
-    """ 
-    RT is 3x4 matrix in shape
-    |R T|
-    """
-    fig = plt.figure()
-    ax = fig.gca(projection='3d')
-
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
-    ax.set_zlabel('z')
-    ax.set_aspect('equal')
-    # Top-down view?
-    #ax.view_init(azim=270, elev=90)
-    ax.view_init(azim=60, elev=50)
-
-    OXYZ = np.array([[0,0,0],[1,0,0],[0,1,0],[0,0,1]])
-
-    # Draw origin
-    draw_oxyz(ax, OXYZ)
-
-    # RT*origin
-    tmp = RT[:,:-1].dot(OXYZ.T) + RT[:,-1].reshape(3,1)
-    tmp = tmp.T # Transpose to be 4 points x3 matrix
-
-    # Draw rotate-n-translated points
-    draw_oxyz_gt(ax, tmp)
-
-    plt.show()
 
 
 def q2R(w, x, y, z):
@@ -119,6 +60,7 @@ def q2R(w, x, y, z):
     return R
 
 basedir = '/Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/'
+#basedir = '/media/data/EuRoC_MAV_datset/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/'
 # Load cam0 sensor config\n",
 with open(basedir+'mav0/cam0/sensor.yaml') as fp:
     cam0_yaml = yaml.load(fp)
@@ -186,21 +128,21 @@ T_WL = np.asarray(T_WL)
 T_BC = np.asarray(T_BC)
 T_BL = np.asarray(T_BL)
 
-# Convert from Leica prisma to body(imu0)
+# Convert from body(imu0) to Leica prisma
 T_LB = np.linalg.inv(T_BL)  # Matrix 4x4
-# Convert from Leica prisma (via body) to camera
-T_LC = T_BC.dot(T_LB)       # Matrix 4x4
-# Finally from world to camera coordinate system
+# Convert from camera(cam0) to Leica prisma (via body)
+T_LC = T_LB.dot(T_BC)       # Matrix 4x4
+# Finally from camera coordinate system to the world system
 for i in range(T_WL.shape[0]):
-    tmp_4x4 = np.vstack((T_WL[i], [0,0,0,1]))
-    T_WC_tmp = T_LC.dot(tmp_4x4)
-    T_WC.append(T_WC_tmp[:-1])
+    T_WL_4x4 = np.vstack((T_WL[i], [0,0,0,1]))
+    T_WC_4x4 = T_WL_4x4.dot(T_LC)
+    T_WC.append(T_WC_4x4[:-1])
 T_WC = np.asarray(T_WC)
 
 # Saving into files
 np.save("TS.npy", TS)
-np.save("T_WL.npy", T_WL)
-np.save("T_LC.npy", T_LC)
+#np.save("T_WL.npy", T_WL)
+#np.save("T_LC.npy", T_LC)
 np.save("T_WC.npy", T_WC)
 
 # Draw the trajectory 
