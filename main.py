@@ -66,9 +66,9 @@ RANSAC_INLIER_RATIO_THRESH = 0.6
 # List of camera data
 frame_img_list = np.sort(glob.glob(basedir+'mav0/cam0/data/*.png'))
 
-START_FRAME = 1321 # A good frame to try normal initialization.
+#START_FRAME = 1321 # A good frame to try normal initialization.
 #START_FRAME = 2679
-#START_FRAME = 3000
+START_FRAME = 3000
 #START_FRAME = 1387 # ~1411 Rotation dominant?
 
 #START_FRAME = 465 # Static scene, expect large ave(Z)
@@ -461,32 +461,39 @@ if timestamp_fr[0] not in TS:
 else:
     idx0 = TS.index(timestamp_fr[0])
     # ground-truth origin to first frame camera origin (new world origin)
-    R_w2c = T_WC[idx0][:,:-1]
-    inv_R_w2c = np.linalg.inv(R_w2c)
-    T_w2c = T_WC[idx0][:,-1].reshape(3,1)
+    R_c2w = T_WC[idx0][:,:-1]
+    R_w2c = np.linalg.inv(R_c2w)
+    T_c2w = T_WC[idx0][:,-1].reshape(3,1)
+    T_w2c = -R_w2c.dot(T_c2w)
 
 if timestamp_fr[1] not in TS:
     sys.exit("Frame 1 (", str(timestamp_fr[1]), " not in ground-truth")
 
+print("len(timestamp_fr)=", len(timestamp_fr), "len(R_mat)=", len(R_mat), "len(T_vec)=", len(T_vec))
+
 # Extract ground truth
 gt_R = []
 gt_T = []
-for i in range(1,len(timestamp_fr),1):
+for i in range(1,len(timestamp_fr),1): # R_mat/T_vec inherently is one element shorter than timestamp_fr.
     if timestamp_fr[i] in TS:
         idx = TS.index(timestamp_fr[i])
-        R_w2c_new = T_WC[idx][:,:-1]
-        T_w2c_new = T_WC[idx][:,-1].reshape(3,1)
+        R_c2w_new = T_WC[idx][:,:-1]
+        R_w2c_new = np.linalg.inv(R_c2w_new)
+        T_c2w_new = T_WC[idx][:,-1].reshape(3,1)
+        T_w2c_new = -R_w2c_new.dot(T_c2w_new)
         # Calculate the ground truth of relative R|T
         # R_new = R_cam2new R_w2c -> R_cam2new = R_new * R_w2c^-1
-        gt_R.append(R_w2c_new.dot(inv_R_w2c))
+        gt_R.append(R_w2c.dot(R_c2w_new))
         # T_old2new = T_new - T_old
-        gt_T.append(R_w2c.dot(T_w2c_new-T_w2c))
+        gt_T.append(R_w2c.dot(T_c2w_new-T_c2w))
     else: 
         # Remove the estimated R|T from R_mat, T_vec
         # as there's no GT data for this entry.
-        print("No ground truth data for entry ", i, ", deleted from R_mat/T_vec...")
-        del(R_mat[i])
-        del(T_vec[i])
+        print("No ground truth data for entry ", i-1, " in R_mat|T_vec, deleted from R_mat/T_vec...")
+        del(R_mat[i-1])
+        del(T_vec[i-1])
+
+print ("len(gt_R)=", len(gt_R), "len(gt_T)=", len(gt_T))
 
 # Recover absolute scale for comparison
 scale = np.linalg.norm(gt_T[0]) # real_length_baseline = 1 * scale
@@ -502,7 +509,7 @@ inlier_pts_3D = scale * inlier_pts_3D
 fig = plt.figure()
 ax = fig.gca(projection='3d')
 
-ax.legend()
+#ax.legend()
 ax.set_xlabel('x')
 ax.set_ylabel('y')
 ax.set_zlabel('z')
@@ -510,19 +517,17 @@ ax.set_aspect('equal')
 # Top-down view?
 #ax.view_init(azim=270, elev=90)
 #
-ax.view_init(azim=60, elev=50)
-#plt.show()
-
+#ax.view_init(azim=60, elev=50)
+ax.view_init(azim=-90, elev=-45)
 
 # Draw point cloud
 ax.scatter3D(inlier_pts_3D[:,0], inlier_pts_3D[:,1], inlier_pts_3D[:,2], c=inlier_pts_3D[:,2],
         label='Features Point Cloud')
 
-
 # set plot limit
-ax.set_xlim([-5,5])
-ax.set_ylim([-5,5])
-ax.set_zlim([-5,5])
+ax.set_xlim([-1.5,1.5])
+ax.set_ylim([-1.5,1.5])
+ax.set_zlim([-1.5,1.5])
 
 # Draw world origin (assuming first frame camera origin as world origin)
 # Notice it is DIFFERENT from ground truth world origin!
@@ -541,9 +546,9 @@ for i in range(len(R_mat)):
 # Draw ground truth
 draw_oxyz_gray(ax, Cam_OXYZ) # Origin
 for i in range(len(gt_R)):
-    Rotation = np.linalg.inv(gt_R[i])
+    Rotation = gt_R[i]
     Translation = gt_T[i]
-    tmp = Rotation.dot((Cam_OXYZ - Translation.T).T)
+    tmp = Rotation.dot(Cam_OXYZ.T) + Translation.reshape(3,1)
     OXYZ1 = tmp.T
     draw_oxyz_gt(ax, OXYZ1)
 
