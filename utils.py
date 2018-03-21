@@ -1031,3 +1031,102 @@ def draw_oxyz_RT(RT):
     draw_oxyz_gt(ax, tmp)
 
     plt.show()
+
+def draw_est_vs_gt(estimate, gt, name='est_vs_gt'):
+    """ 
+    Draw tables comparing estimation vs. ground truth.
+
+    estimate - Estimation values in Nx4 ndarray. N samples, [yaw, pitch, roll, translation] per row.
+    gt - Ground truth, same Nx4 array.
+    """
+    estimate_color = (0.5, 0.2, 0.1, 1.0)
+    gt_color = (0.2, 0.7, 0.1, 1.0)
+
+    plt.figure(1)
+
+    plt.subplot(221)
+    plt.title('Yaw')
+    plt.xlabel('frame')
+    plt.ylabel('radius')
+    plt.plot(list(range(1,estimate.shape[1]+1)), estimate[0], 'rx', color=estimate_color, label='estimation')
+    plt.plot(list(range(1,gt.shape[1]+1)), gt[0], 'gx', color=gt_color, label='ground truth')
+    plt.grid(True)
+
+    plt.subplot(222)
+    plt.title('Pitch')
+    plt.xlabel('frame')
+    plt.ylabel('radius')
+    plt.plot(list(range(1,estimate.shape[1]+1)), estimate[1], 'rx', color=estimate_color)
+    plt.plot(list(range(1,gt.shape[1]+1)), gt[1], 'gx', color=gt_color)
+    plt.grid(True)
+
+    plt.subplot(223)
+    plt.title('Roll')
+    plt.xlabel('frame')
+    plt.ylabel('radius')
+    plt.plot(list(range(1,estimate.shape[1]+1)), estimate[2], 'rx', color=estimate_color)
+    plt.plot(list(range(1,gt.shape[1]+1)), gt[2], 'gx', color=gt_color)
+    plt.grid(True)
+
+    plt.subplot(224)
+    plt.title('Translation')
+    plt.xlabel('frame')
+    plt.ylabel('meter')
+    plt.plot(list(range(1,estimate.shape[1]+1)), estimate[3], 'rx', color=estimate_color)
+    plt.plot(list(range(1,gt.shape[1]+1)), gt[3], 'gx', color=gt_color)
+    plt.grid(True)
+
+    plt.figlegend(loc= (0.2,0.8))
+    plt.tight_layout()
+    plt.savefig(name+'.png')
+    plt.show()
+
+#----------------------------------------------
+# Rotatio/Translation conversions between different representations
+#----------------------------------------------
+def R2Euler(R):
+    """ 
+    Convert rotation matrix to euler angles. 
+    Industry standard order is Z-Y-X = Yaw-Pitch-Roll.
+    """
+    cosine_for_pitch = np.sqrt(R[0,0] ** 2 + R[1,0] ** 2)
+    is_singular = cosine_for_pitch < 1e-6
+    if not is_singular:
+        yaw = np.arctan2(R[1,0], R[0,0])
+        pitch = np.arctan2(-R[2,0], cosine_for_pitch)
+        roll = np.arctan2(R[2,1], R[2,2])
+    else:
+        yaw = np.arctan2(-R[1,2], R[1,1])
+        pitch = np.arctan2(-R[2,0], cosine_for_pitch)
+        roll = 0
+    
+    return yaw, pitch, roll
+
+def q2R(w, x, y, z):
+    """
+    Transform a unit quaternion into its corresponding rotation matrix (to
+    be applied on the right side).
+    """
+    xx2 = 2 * x * x
+    yy2 = 2 * y * y
+    zz2 = 2 * z * z
+    xy2 = 2 * x * y
+    wz2 = 2 * w * z
+    zx2 = 2 * z * x
+    wy2 = 2 * w * y
+    yz2 = 2 * y * z
+    wx2 = 2 * w * x
+      
+    R = np.empty((3, 3), float)
+    R[0,0] = 1. - yy2 - zz2
+    R[0,1] = xy2 - wz2
+    R[0,2] = zx2 + wy2
+    R[1,0] = xy2 + wz2
+    R[1,1] = 1. - xx2 - zz2
+    R[1,2] = yz2 - wx2
+    R[2,0] = zx2 - wy2
+    R[2,1] = yz2 + wx2
+    R[2,2] = 1. - xx2 - yy2
+      
+    return R
+

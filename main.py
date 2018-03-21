@@ -68,8 +68,8 @@ frame_img_list = np.sort(glob.glob(basedir+'mav0/cam0/data/*.png'))
 
 #START_FRAME = 1321 # A good frame to try normal initialization.
 #START_FRAME = 2679
-START_FRAME = 3000
-#START_FRAME = 1387 # ~1411 Rotation dominant?
+#START_FRAME = 3000
+START_FRAME = 1387 # ~1411 Rotation dominant?
 
 #START_FRAME = 465 # Static scene, expect large ave(Z)
 #START_FRAME = 893 # From static to move within 5 frames. Expect large ave(Z) then successfully init.
@@ -493,6 +493,7 @@ for i in range(1,len(timestamp_fr),1): # R_mat/T_vec inherently is one element s
         del(R_mat[i-1])
         del(T_vec[i-1])
 
+print ("len(R_mat)=", len(R_mat), "len(T_vec)=", len(T_vec))
 print ("len(gt_R)=", len(gt_R), "len(gt_T)=", len(gt_T))
 
 # Recover absolute scale for comparison
@@ -534,6 +535,10 @@ ax.set_zlim([-1.5,1.5])
 Cam_OXYZ = np.array([[0,0,0],[1,0,0],[0,1,0],[0,0,1]])
 #draw_oxyz(ax, Cam_OXYZ)
 
+# Estimation vs. Ground-truth in translation/yaw/pitch/roll
+estimate = []
+groundtruth = []
+
 # Draw estimation
 draw_oxyz_gray(ax, Cam_OXYZ) # Origin
 for i in range(len(R_mat)):
@@ -542,6 +547,9 @@ for i in range(len(R_mat)):
     tmp = Rotation.dot((Cam_OXYZ - Translation).T)
     OXYZ1 = tmp.T
     draw_oxyz(ax, OXYZ1)
+
+    yaw, pitch, roll = R2Euler(Rotation) 
+    estimate.append([yaw, pitch, roll, np.linalg.norm(-Rotation.dot(Translation))])
 
 # Draw ground truth
 draw_oxyz_gray(ax, Cam_OXYZ) # Origin
@@ -552,5 +560,15 @@ for i in range(len(gt_R)):
     OXYZ1 = tmp.T
     draw_oxyz_gt(ax, OXYZ1)
 
+    yaw, pitch, roll = R2Euler(Rotation) 
+    groundtruth.append([yaw, pitch, roll, np.linalg.norm(Translation)])
+
 plt.show()
 
+# Save for further processing
+estimate = np.array(estimate).T
+groundtruth = np.array(groundtruth).T
+np.save("estimate.npy", estimate)
+np.save("groundtruth.npy", groundtruth)
+
+draw_est_vs_gt(estimate, groundtruth, 'est_vs_gt_'+str(START_FRAME))

@@ -26,39 +26,6 @@ from utils import *
 fr1 = 28600
 fr2 = 30000
 
-
-def q2R(w, x, y, z):
-    """
-    Transform a unit quaternion into its corresponding rotation matrix (to
-    be applied on the right side).
-      
-    :returns: transform matrix
-    :rtype: numpy array
-  
-    """
-    xx2 = 2 * x * x
-    yy2 = 2 * y * y
-    zz2 = 2 * z * z
-    xy2 = 2 * x * y
-    wz2 = 2 * w * z
-    zx2 = 2 * z * x
-    wy2 = 2 * w * y
-    yz2 = 2 * y * z
-    wx2 = 2 * w * x
-      
-    R = np.empty((3, 3), float)
-    R[0,0] = 1. - yy2 - zz2
-    R[0,1] = xy2 - wz2
-    R[0,2] = zx2 + wy2
-    R[1,0] = xy2 + wz2
-    R[1,1] = 1. - xx2 - zz2
-    R[1,2] = yz2 - wx2
-    R[2,0] = zx2 - wy2
-    R[2,1] = yz2 + wx2
-    R[2,2] = 1. - xx2 - yy2
-      
-    return R
-
 basedir = '/Users/jcli/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/'
 #basedir = '/media/data/EuRoC_MAV_datset/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/'
 # Load cam0 sensor config\n",
