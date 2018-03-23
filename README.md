@@ -3,6 +3,7 @@ This was the capstone project for my course
 _[CS231A](http://web.stanford.edu/class/cs231a/): Computer Vision, From 3D Reconstruction to Recognition_. 
 
 * [Presentation slides here](https://docs.google.com/presentation/d/1grKiimDXM6Rfszo6z3Zg5X653VU50nB1VyK5uZEYOJY/edit?usp=sharing)
+* [Project report paper here](./cs231a_project_report_MonoVOInit.pdf)
 
 ## Project summary
 * A successfully initialized Monocular Visual Odometry demo'ed below. A log of one such run can be found at [./paper_related/sample_main.log](./paper_related/sample_main.log). 
