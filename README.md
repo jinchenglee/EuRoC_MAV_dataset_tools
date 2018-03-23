@@ -6,6 +6,9 @@ _[CS231A](http://web.stanford.edu/class/cs231a/): Computer Vision, From 3D Recon
 * [Project report paper here](./cs231a_project_report_MonoVOInit.pdf)
 
 ## Project summary
+
+ (The project assumes EuRoC data set is available/downloaded previously. The path to the EuRoC dataset is set in main.py. For example, basedir = '~/study/asl_dataset/ijrr_euroc_mav_dataset/machine_hall/MH_01_easy/')
+
 * A successfully initialized Monocular Visual Odometry demo'ed below. A log of one such run can be found at [./paper_related/sample_main.log](./paper_related/sample_main.log). 
 
  
