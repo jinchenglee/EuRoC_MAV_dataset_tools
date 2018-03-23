@@ -43,11 +43,4 @@ _[CS231A](http://web.stanford.edu/class/cs231a/): Computer Vision, From 3D Recon
 	* Maintain local feature map and add Bundle-Adjustment to optimize local map. Current BA is only used to sanity check structure-only non-linear optimized initial point cloud quality. It is not stitched into pipeline. 
 * Python -> C++, real-time app like SVO. 
 
-------------------------------
-(It was branched from EuRoC dataset_tools git repo. Keep those old udpates below.)
-# dataset_tools
-Loader for the generic ASL dataset format. The corresponding datasets can be foung here: http://projects.asl.ethz.ch/datasets/doku.php?id=kmavvisualinertialdatasets .
 
-Forked from original repo.
-1. Modified certain files to allow Octave to run dataset_plot.m.
-2. Add dependency on libyaml python library from https://github.com/yaml/libyaml

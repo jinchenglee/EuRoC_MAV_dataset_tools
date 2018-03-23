@@ -7,9 +7,6 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
-# Local scripts
-import tile_of_ransac as r
-
 #-------------
 # Optical Flow related setting
 #-------------
